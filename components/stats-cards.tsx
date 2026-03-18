@@ -1,10 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   File01Icon,
   Loading03Icon,
   CheckmarkCircle01Icon,
   DollarCircleIcon,
-} from "hugeicons-react"
+} from "@hugeicons/core-free-icons"
 
 interface StatsCardsProps {
   totalJobs: number
@@ -48,7 +49,7 @@ export function StatsCards({
         <Card key={stat.label}>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-              <stat.icon size={20} className="text-muted-foreground" />
+              <HugeiconsIcon icon={stat.icon} size={20} className="text-muted-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">{stat.label}</p>

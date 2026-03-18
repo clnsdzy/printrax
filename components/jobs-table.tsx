@@ -13,7 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Edit02Icon, Delete02Icon, PrinterIcon } from "hugeicons-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Edit02Icon, Delete02Icon, PrinterIcon } from "@hugeicons/core-free-icons"
 
 interface JobsTableProps {
   jobs: PrintJob[]
@@ -64,7 +65,7 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16">
-          <PrinterIcon size={64} className="mb-4 text-muted-foreground/50" />
+          <HugeiconsIcon icon={PrinterIcon} size={64} className="mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-medium text-muted-foreground">
             No print jobs yet
           </h3>
@@ -133,7 +134,7 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                         onClick={() => onUpdateProgress(job)}
                         title="Update Progress"
                       >
-                        <Edit02Icon size={16} />
+                        <HugeiconsIcon icon={Edit02Icon} size={16} />
                       </Button>
                       <Button
                         variant="ghost"
@@ -141,7 +142,7 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                         onClick={() => onDelete(job)}
                         title="Delete"
                       >
-                        <Delete02Icon size={16} />
+                        <HugeiconsIcon icon={Delete02Icon} size={16} />
                       </Button>
                     </div>
                   </TableCell>
