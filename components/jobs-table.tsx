@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Edit02Icon, Delete02Icon, PrinterIcon } from "@hugeicons/core-free-icons"
+import { PencilEdit02Icon, Delete02Icon, PrinterIcon } from "@hugeicons/core-free-icons"
 
 interface JobsTableProps {
   jobs: PrintJob[]
@@ -134,7 +134,7 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                         onClick={() => onUpdateProgress(job)}
                         title="Update Progress"
                       >
-                        <HugeiconsIcon icon={Edit02Icon} size={16} />
+                        <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
                       </Button>
                       <Button
                         variant="ghost"

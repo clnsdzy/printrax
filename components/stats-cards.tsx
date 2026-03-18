@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  File01Icon,
-  Loading03Icon,
-  CheckmarkCircle01Icon,
+  FileIcon,
+  Loading01Icon,
+  CheckmarkCircle02Icon,
   DollarCircleIcon,
 } from "@hugeicons/core-free-icons"
 
@@ -24,17 +24,17 @@ export function StatsCards({
     {
       label: "Total Jobs",
       value: totalJobs,
-      icon: File01Icon,
+      icon: FileIcon,
     },
     {
       label: "In Progress",
       value: inProgress,
-      icon: Loading03Icon,
+      icon: Loading01Icon,
     },
     {
       label: "Completed",
       value: completed,
-      icon: CheckmarkCircle01Icon,
+      icon: CheckmarkCircle02Icon,
     },
     {
       label: "Total Revenue",
