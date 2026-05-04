@@ -2,15 +2,7 @@
 
 import Link from "next/link"
 import { PrintJob } from "@/types/job"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -21,11 +13,6 @@ interface JobsTableProps {
   jobs: PrintJob[]
   onUpdateProgress: (job: PrintJob) => void
   onDelete: (job: PrintJob) => void
-}
-
-function truncate(str: string, maxLength: number) {
-  if (str.length <= maxLength) return str
-  return str.slice(0, maxLength) + "..."
 }
 
 function getStatusBadgeVariant(status: PrintJob["status"]) {
@@ -64,102 +51,100 @@ function getProgressColor(status: PrintJob["status"]) {
 export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) {
   if (jobs.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <HugeiconsIcon icon={PrinterIcon} size={64} className="mb-4 text-muted-foreground/50" />
-          <h3 className="text-lg font-medium text-muted-foreground">
-            No print jobs yet
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Click the &quot;New Job&quot; button to create your first print job.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-16">
+        <HugeiconsIcon icon={PrinterIcon} size={64} className="mb-4 text-muted-foreground/50" />
+        <h3 className="text-lg font-medium text-muted-foreground">
+          No print jobs yet
+        </h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Click the &quot;New Job&quot; button to create your first print job.
+        </p>
+      </div>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Print Jobs</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Job Name</TableHead>
-              <TableHead className="hidden md:table-cell">Description</TableHead>
-              <TableHead>Qty</TableHead>
-              <TableHead className="hidden sm:table-cell">Rate</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Progress</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {jobs.map((job) => {
-              const progressPercent = (job.quantityPrinted / job.quantity) * 100
-              return (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/jobs/${job.id}`}
-                      className="text-primary hover:underline"
-                    >
+    <div>
+      <h2 className="mb-6 text-2xl font-bold">Print Jobs</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {jobs.map((job) => {
+          const progressPercent = (job.quantityPrinted / job.quantity) * 100
+          return (
+            <Card key={job.id} className="flex flex-col">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <Link
+                    href={`/jobs/${job.id}`}
+                    className="flex-1"
+                  >
+                    <CardTitle className="text-base hover:text-primary transition-colors">
                       {job.jobName}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden max-w-[200px] md:table-cell">
-                    {truncate(job.description || "-", 40)}
-                  </TableCell>
-                  <TableCell>
-                    <span className="whitespace-nowrap">
+                    </CardTitle>
+                  </Link>
+                  <Badge variant={getStatusBadgeVariant(job.status)}>
+                    {getStatusLabel(job.status)}
+                  </Badge>
+                </div>
+                <CardDescription className="line-clamp-2">
+                  {job.description || "No description"}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="flex-1 space-y-4">
+                {/* Progress Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">
                       {job.quantityPrinted} / {job.quantity}
                     </span>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    ₦{job.rate.toFixed(2)}
-                  </TableCell>
-                  <TableCell>₦{job.amount.toFixed(2)}</TableCell>
-                  <TableCell className="min-w-[100px]">
-                    <Progress
-                      value={progressPercent}
-                      className="h-2"
-                      indicatorClassName={getProgressColor(job.status)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(job.status)}>
-                      {getStatusLabel(job.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onUpdateProgress(job)}
-                        title="Update Progress"
-                      >
-                        <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(job)}
-                        title="Delete"
-                      >
-                        <HugeiconsIcon icon={Delete02Icon} size={16} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                  </div>
+                  <Progress
+                    value={progressPercent}
+                    className="h-2"
+                    indicatorClassName={getProgressColor(job.status)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {Math.round(progressPercent)}% complete
+                  </p>
+                </div>
+
+                {/* Financials Section */}
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Rate</p>
+                    <p className="font-semibold">₦{job.rate.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="font-semibold">₦{job.amount.toFixed(2)}</p>
+                  </div>
+                </div>
+
+                {/* Actions Section */}
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => onUpdateProgress(job)}
+                  >
+                    <HugeiconsIcon icon={PencilEdit02Icon} size={16} data-icon="inline-start" />
+                    Update
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDelete(job)}
+                  >
+                    <HugeiconsIcon icon={Delete02Icon} size={16} />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
   )
 }
