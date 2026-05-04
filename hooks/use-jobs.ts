@@ -56,8 +56,14 @@ export function useJobs() {
           }),
         })
 
-        if (!response.ok) throw new Error("Failed to create job")
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error("[v0] API error response:", errorData)
+          throw new Error(errorData.error || "Failed to create job")
+        }
+        
         const data = await response.json()
+        console.log("[v0] Job created successfully:", data)
 
         const newJob: PrintJob = {
           id: data.id,
