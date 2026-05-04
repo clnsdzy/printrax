@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { UpdateProgressModal } from "@/components/update-progress-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
+import { NewJobModal } from "@/components/new-job-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeftIcon } from "@hugeicons/core-free-icons"
 
@@ -18,10 +19,12 @@ export default function JobDetailPage() {
   const router = useRouter()
   const params = useParams()
   const jobId = params.id as string
-  const { jobs, isLoaded, updateProgress, deleteJob } = useJobs()
-  
+  const { jobs, isLoaded, updateProgress, deleteJob, addJob } = useJobs()
+
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [newJobOpen, setNewJobOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const job = useMemo(() => jobs.find((j) => j.id === jobId), [jobs, jobId])
 
@@ -32,6 +35,23 @@ export default function JobDetailPage() {
   const handleConfirmDelete = (id: string) => {
     deleteJob(id)
     router.push("/")
+  }
+
+  const handleAddJob = async (data: {
+    jobName: string
+    description: string
+    rate: number
+    quantity: number
+  }) => {
+    try {
+      setError(null)
+      await addJob(data)
+      setNewJobOpen(false)
+      router.push("/")
+    } catch (err) {
+      console.error("[v0] Failed to add job:", err)
+      setError(err instanceof Error ? err.message : "Failed to create job")
+    }
   }
 
   if (!isLoaded) {
@@ -45,7 +65,8 @@ export default function JobDetailPage() {
   if (!job) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar onNewJob={() => {}} />
+        <Navbar onNewJob={() => setNewJobOpen(true)} />
+
         <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <Button
             variant="outline"
@@ -55,6 +76,7 @@ export default function JobDetailPage() {
             <HugeiconsIcon icon={ArrowLeftIcon} size={16} className="mr-2" />
             Back
           </Button>
+
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <h3 className="text-lg font-medium">Job not found</h3>
@@ -64,6 +86,12 @@ export default function JobDetailPage() {
             </CardContent>
           </Card>
         </main>
+
+        <NewJobModal
+          open={newJobOpen}
+          onOpenChange={setNewJobOpen}
+          onSubmit={handleAddJob}
+        />
       </div>
     )
   }
@@ -117,7 +145,7 @@ export default function JobDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNewJob={() => {}} />
+      <Navbar onNewJob={() => setNewJobOpen(true)} />
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Button
@@ -130,7 +158,6 @@ export default function JobDetailPage() {
         </Button>
 
         <div className="space-y-6">
-          {/* Header Card */}
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -147,7 +174,6 @@ export default function JobDetailPage() {
             </CardHeader>
           </Card>
 
-          {/* Description Card */}
           <Card>
             <CardHeader>
               <CardTitle>Description</CardTitle>
@@ -159,7 +185,6 @@ export default function JobDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Progress Card */}
           <Card>
             <CardHeader>
               <CardTitle>Production Progress</CardTitle>
@@ -174,8 +199,7 @@ export default function JobDetailPage() {
                     <p className="text-3xl font-bold">
                       {job.quantityPrinted}
                       <span className="text-xl text-muted-foreground">
-                        {" "}
-                        / {job.quantity}
+                        {" "}/ {job.quantity}
                       </span>
                     </p>
                   </div>
@@ -198,16 +222,12 @@ export default function JobDetailPage() {
                 </div>
               )}
 
-              <Button
-                onClick={() => setUpdateProgressOpen(true)}
-                className="w-full"
-              >
+              <Button onClick={() => setUpdateProgressOpen(true)} className="w-full">
                 Update Progress
               </Button>
             </CardContent>
           </Card>
 
-          {/* Financials Card */}
           <Card>
             <CardHeader>
               <CardTitle>Financials</CardTitle>
@@ -220,7 +240,7 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">₦</span>
+                      <span className="text-inherit">?</span>
                       <span>{job.rate.toFixed(2)}</span>
                     </span>
                   </p>
@@ -231,7 +251,7 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">₦</span>
+                      <span className="text-inherit">?</span>
                       <span>{job.amount.toFixed(2)}</span>
                     </span>
                   </p>
@@ -242,7 +262,7 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">₦</span>
+                      <span className="text-inherit">?</span>
                       <span>{(job.rate * job.quantityPrinted).toFixed(2)}</span>
                     </span>
                   </p>
@@ -253,7 +273,7 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">₦</span>
+                      <span className="text-inherit">?</span>
                       <span>{(job.rate * remainingQuantity).toFixed(2)}</span>
                     </span>
                   </p>
@@ -262,17 +282,12 @@ export default function JobDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Actions Card */}
           <Card className="border-red-200">
             <CardHeader>
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                className="w-full"
-              >
+              <Button variant="destructive" onClick={handleDelete} className="w-full">
                 Delete Job
               </Button>
             </CardContent>
@@ -292,6 +307,12 @@ export default function JobDetailPage() {
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={handleConfirmDelete}
+      />
+
+      <NewJobModal
+        open={newJobOpen}
+        onOpenChange={setNewJobOpen}
+        onSubmit={handleAddJob}
       />
     </div>
   )
