@@ -219,7 +219,7 @@ export default function JobDetailPage() {
                     Rate per Unit
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ${job.rate.toFixed(2)}
+                    ₦{job.rate.toFixed(2)}
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -227,7 +227,7 @@ export default function JobDetailPage() {
                     Total Amount
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ${job.amount.toFixed(2)}
+                    ₦{job.amount.toFixed(2)}
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -235,7 +235,7 @@ export default function JobDetailPage() {
                     Revenue Earned
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ${(job.rate * job.quantityPrinted).toFixed(2)}
+                    ₦{(job.rate * job.quantityPrinted).toFixed(2)}
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -243,7 +243,7 @@ export default function JobDetailPage() {
                     Pending Revenue
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ${(job.rate * remainingQuantity).toFixed(2)}
+                    ₦{(job.rate * remainingQuantity).toFixed(2)}
                   </p>
                 </div>
               </div>

@@ -90,7 +90,7 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="rate">Rate per Unit ($) *</Label>
+                <Label htmlFor="rate">Rate per Unit (₦) *</Label>
                 <Input
                   id="rate"
                   type="number"
@@ -118,7 +118,7 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
             <div className="grid gap-2">
               <Label>Total Amount</Label>
               <div className="flex h-9 w-full items-center rounded-md border bg-muted px-3 text-sm">
-                ${calculatedAmount}
+                ₦{calculatedAmount}
               </div>
             </div>
           </div>

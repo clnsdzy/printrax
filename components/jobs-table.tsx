@@ -119,9 +119,9 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    ${job.rate.toFixed(2)}
+                    ₦{job.rate.toFixed(2)}
                   </TableCell>
-                  <TableCell>${job.amount.toFixed(2)}</TableCell>
+                  <TableCell>₦{job.amount.toFixed(2)}</TableCell>
                   <TableCell className="min-w-[100px]">
                     <Progress
                       value={progressPercent}
