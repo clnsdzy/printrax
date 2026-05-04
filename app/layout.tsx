@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -24,9 +25,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${jetbrainsMono.variable} font-sans antialiased`}>
-        {children}
+        <ThemeProvider
+          defaultTheme="system"
+          storageKey="printrax-ui-theme"
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -38,8 +38,9 @@ export function StatsCards({
     },
     {
       label: "Total Revenue",
-      value: `₦${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      value: totalRevenue,
       icon: DollarCircleIcon,
+      currency: true,
     },
   ]
 
@@ -53,7 +54,16 @@ export function StatsCards({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
-              <p className="text-xl font-semibold">{stat.value}</p>
+              <p className="text-xl font-semibold">
+                {stat.currency ? (
+                  <span className="inline-flex items-baseline gap-1">
+                    <span className="text-inherit">₦</span>
+                    <span>{stat.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+                  </span>
+                ) : (
+                  stat.value
+                )}
+              </p>
             </div>
           </CardContent>
         </Card>

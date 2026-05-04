@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { PrinterIcon, PlusSignIcon } from "@hugeicons/core-free-icons"
 
@@ -16,10 +17,13 @@ export function Navbar({ onNewJob }: NavbarProps) {
           <HugeiconsIcon icon={PrinterIcon} size={28} className="text-primary" />
           <span className="text-xl font-bold tracking-tight">Printrax</span>
         </div>
-        <Button onClick={onNewJob}>
-          <HugeiconsIcon icon={PlusSignIcon} size={16} />
-          New Job
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button onClick={onNewJob}>
+            <HugeiconsIcon icon={PlusSignIcon} size={16} />
+            New Job
+          </Button>
+        </div>
       </div>
     </header>
   )

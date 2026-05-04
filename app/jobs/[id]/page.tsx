@@ -126,7 +126,7 @@ export default function JobDetailPage() {
           onClick={() => router.push("/")}
         >
           <HugeiconsIcon icon={ArrowLeftIcon} size={16} className="mr-2" />
-          Back to Dashboard
+          Dashboard
         </Button>
 
         <div className="space-y-6">
@@ -219,7 +219,10 @@ export default function JobDetailPage() {
                     Rate per Unit
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ₦{job.rate.toFixed(2)}
+                    <span className="inline-flex items-baseline gap-1">
+                      <span className="text-inherit">₦</span>
+                      <span>{job.rate.toFixed(2)}</span>
+                    </span>
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -227,7 +230,10 @@ export default function JobDetailPage() {
                     Total Amount
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ₦{job.amount.toFixed(2)}
+                    <span className="inline-flex items-baseline gap-1">
+                      <span className="text-inherit">₦</span>
+                      <span>{job.amount.toFixed(2)}</span>
+                    </span>
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -235,7 +241,10 @@ export default function JobDetailPage() {
                     Revenue Earned
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ₦{(job.rate * job.quantityPrinted).toFixed(2)}
+                    <span className="inline-flex items-baseline gap-1">
+                      <span className="text-inherit">₦</span>
+                      <span>{(job.rate * job.quantityPrinted).toFixed(2)}</span>
+                    </span>
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
@@ -243,7 +252,10 @@ export default function JobDetailPage() {
                     Pending Revenue
                   </p>
                   <p className="mt-1 text-2xl font-bold">
-                    ₦{(job.rate * remainingQuantity).toFixed(2)}
+                    <span className="inline-flex items-baseline gap-1">
+                      <span className="text-inherit">₦</span>
+                      <span>{(job.rate * remainingQuantity).toFixed(2)}</span>
+                    </span>
                   </p>
                 </div>
               </div>

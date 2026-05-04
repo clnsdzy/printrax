@@ -118,7 +118,10 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
             <div className="grid gap-2">
               <Label>Total Amount</Label>
               <div className="flex h-9 w-full items-center rounded-md border bg-muted px-3 text-sm">
-                ₦{calculatedAmount}
+                <span className="inline-flex items-baseline gap-1 text-sm">
+                  <span className="text-inherit">₦</span>
+                  <span>{calculatedAmount}</span>
+                </span>
               </div>
             </div>
           </div>
