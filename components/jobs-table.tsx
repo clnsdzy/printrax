@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { PrintJob } from "@/types/job"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -101,7 +102,14 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
               const progressPercent = (job.quantityPrinted / job.quantity) * 100
               return (
                 <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.jobName}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {job.jobName}
+                    </Link>
+                  </TableCell>
                   <TableCell className="hidden max-w-[200px] md:table-cell">
                     {truncate(job.description || "-", 40)}
                   </TableCell>
@@ -111,9 +119,9 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    ${job.rate.toFixed(2)}
+                    ₦{job.rate.toFixed(2)}
                   </TableCell>
-                  <TableCell>${job.amount.toFixed(2)}</TableCell>
+                  <TableCell>₦{job.amount.toFixed(2)}</TableCell>
                   <TableCell className="min-w-[100px]">
                     <Progress
                       value={progressPercent}

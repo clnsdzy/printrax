@@ -38,7 +38,7 @@ export function StatsCards({
     },
     {
       label: "Total Revenue",
-      value: `$${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      value: `₦${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
       icon: DollarCircleIcon,
     },
   ]

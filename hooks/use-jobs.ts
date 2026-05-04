@@ -3,122 +3,141 @@
 import { useState, useEffect, useCallback } from "react"
 import { PrintJob, deriveStatus, calculateAmount } from "@/types/job"
 
-const STORAGE_KEY = "printrax_jobs"
-
-const initialMockJobs: PrintJob[] = [
-  {
-    id: "1",
-    jobName: "Business Cards - ABC Corp",
-    description: "Premium matte business cards with gold foil accents for the CEO",
-    rate: 2.5,
-    quantity: 500,
-    quantityPrinted: 0,
-    amount: 1250,
-    status: "not_started",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-  },
-  {
-    id: "2",
-    jobName: "Event Flyers - Music Festival",
-    description: "A4 glossy flyers for the upcoming summer music festival event",
-    rate: 0.75,
-    quantity: 1000,
-    quantityPrinted: 650,
-    amount: 750,
-    status: "in_progress",
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: "3",
-    jobName: "Restaurant Menus - The Bistro",
-    description: "Laminated tri-fold menus with updated seasonal dishes and prices",
-    rate: 4.0,
-    quantity: 100,
-    quantityPrinted: 100,
-    amount: 400,
-    status: "completed",
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "4",
-    jobName: "Wedding Invitations - Smith",
-    description: "Elegant ivory cardstock invitations with envelope printing",
-    rate: 3.0,
-    quantity: 200,
-    quantityPrinted: 85,
-    amount: 600,
-    status: "in_progress",
-    createdAt: new Date().toISOString(),
-  },
-]
-
 export function useJobs() {
   const [jobs, setJobs] = useState<PrintJob[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
 
+  // Fetch all jobs on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        setJobs(JSON.parse(stored))
-      } catch {
-        setJobs(initialMockJobs)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockJobs))
-      }
-    } else {
-      setJobs(initialMockJobs)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMockJobs))
-    }
-    setIsLoaded(true)
+    fetchJobs()
   }, [])
 
-  const saveJobs = useCallback((newJobs: PrintJob[]) => {
-    setJobs(newJobs)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newJobs))
+  const fetchJobs = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/jobs")
+      if (!response.ok) throw new Error("Failed to fetch jobs")
+      const data = await response.json()
+
+      const formattedJobs: PrintJob[] = data.map((job: any) => ({
+        id: job.id,
+        jobName: job.job_name,
+        description: job.description,
+        quantity: job.quantity_ordered,
+        quantityPrinted: job.quantity_printed,
+        rate: parseFloat(job.rate_per_unit),
+        amount: calculateAmount(parseFloat(job.rate_per_unit), job.quantity_ordered),
+        status: deriveStatus(job.quantity_printed, job.quantity_ordered),
+        createdAt: job.created_at,
+      }))
+
+      setJobs(formattedJobs)
+      setIsLoaded(true)
+    } catch (error) {
+      console.error("[v0] Error fetching jobs:", error)
+      setIsLoaded(true)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   const addJob = useCallback(
-    (jobData: { jobName: string; description: string; rate: number; quantity: number }) => {
-      const newJob: PrintJob = {
-        id: Date.now().toString(),
-        jobName: jobData.jobName,
-        description: jobData.description,
-        rate: jobData.rate,
-        quantity: jobData.quantity,
-        quantityPrinted: 0,
-        amount: calculateAmount(jobData.rate, jobData.quantity),
-        status: "not_started",
-        createdAt: new Date().toISOString(),
-      }
-      saveJobs([...jobs, newJob])
-    },
-    [jobs, saveJobs]
-  )
+    async (jobData: { jobName: string; description: string; rate: number; quantity: number }) => {
+      try {
+        const response = await fetch("/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jobName: jobData.jobName,
+            description: jobData.description,
+            quantity: jobData.quantity,
+            rate: jobData.rate,
+          }),
+        })
 
-  const updateProgress = useCallback(
-    (id: string, quantityPrinted: number) => {
-      const updatedJobs = jobs.map((job) => {
-        if (job.id === id) {
-          const newQuantityPrinted = Math.min(quantityPrinted, job.quantity)
-          return {
-            ...job,
-            quantityPrinted: newQuantityPrinted,
-            status: deriveStatus(newQuantityPrinted, job.quantity),
-          }
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error("[v0] API error response:", errorData)
+          throw new Error(errorData.error || "Failed to create job")
         }
-        return job
-      })
-      saveJobs(updatedJobs)
+        
+        const data = await response.json()
+        console.log("[v0] Job created successfully:", data)
+
+        const newJob: PrintJob = {
+          id: data.id,
+          jobName: data.job_name,
+          description: data.description,
+          quantity: data.quantity_ordered,
+          quantityPrinted: data.quantity_printed,
+          rate: parseFloat(data.rate_per_unit),
+          amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
+          status: deriveStatus(data.quantity_printed, data.quantity_ordered),
+          createdAt: data.created_at,
+        }
+
+        setJobs((prev) => [newJob, ...prev])
+      } catch (error) {
+        console.error("[v0] Error creating job:", error)
+        throw error
+      }
     },
-    [jobs, saveJobs]
+    []
   )
 
-  const deleteJob = useCallback(
-    (id: string) => {
-      saveJobs(jobs.filter((job) => job.id !== id))
-    },
-    [jobs, saveJobs]
-  )
+  const updateProgress = useCallback(async (id: string, quantityPrinted: number) => {
+    try {
+      const job = jobs.find((j) => j.id === id)
+      if (!job) return
+
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobName: job.jobName,
+          description: job.description,
+          quantity: job.quantity,
+          quantityPrinted: Math.min(quantityPrinted, job.quantity),
+          rate: job.rate,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to update job")
+      const data = await response.json()
+
+      const updatedJob: PrintJob = {
+        id: data.id,
+        jobName: data.job_name,
+        description: data.description,
+        quantity: data.quantity_ordered,
+        quantityPrinted: data.quantity_printed,
+        rate: parseFloat(data.rate_per_unit),
+        amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
+        status: deriveStatus(data.quantity_printed, data.quantity_ordered),
+        createdAt: data.created_at,
+      }
+
+      setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
+    } catch (error) {
+      console.error("[v0] Error updating job:", error)
+      throw error
+    }
+  }, [jobs])
+
+  const deleteJob = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) throw new Error("Failed to delete job")
+      setJobs((prev) => prev.filter((j) => j.id !== id))
+    } catch (error) {
+      console.error("[v0] Error deleting job:", error)
+      throw error
+    }
+  }, [])
 
   const stats = {
     totalJobs: jobs.length,
@@ -127,5 +146,5 @@ export function useJobs() {
     totalRevenue: jobs.reduce((acc, j) => acc + j.amount, 0),
   }
 
-  return { jobs, isLoaded, addJob, updateProgress, deleteJob, stats }
+  return { jobs, isLoading, isLoaded, addJob, updateProgress, deleteJob, stats }
 }

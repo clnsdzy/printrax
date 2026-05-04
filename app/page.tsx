@@ -16,6 +16,23 @@ export default function Dashboard() {
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleAddJob = async (data: {
+    jobName: string
+    description: string
+    rate: number
+    quantity: number
+  }) => {
+    try {
+      setError(null)
+      await addJob(data)
+      setNewJobOpen(false)
+    } catch (err) {
+      console.error("[v0] Failed to add job:", err)
+      setError(err instanceof Error ? err.message : "Failed to create job")
+    }
+  }
 
   const handleUpdateProgress = (job: PrintJob) => {
     setSelectedJob(job)
@@ -59,8 +76,14 @@ export default function Dashboard() {
       <NewJobModal
         open={newJobOpen}
         onOpenChange={setNewJobOpen}
-        onSubmit={addJob}
+        onSubmit={handleAddJob}
       />
+      
+      {error && (
+        <div className="fixed bottom-4 right-4 z-50 bg-red-50 border border-red-200 rounded-md p-4 max-w-sm">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
 
       <UpdateProgressModal
         job={selectedJob}
