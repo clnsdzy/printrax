@@ -18,16 +18,20 @@ interface EditJobModalProps {
   job: PrintJob | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (id: string, rate: number, quantity: number) => void
+  onSubmit: (id: string, jobName: string, description: string, rate: number, quantity: number) => void
 }
 
 export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModalProps) {
+  const [jobName, setJobName] = useState("")
+  const [description, setDescription] = useState("")
   const [rate, setRate] = useState("")
   const [quantity, setQuantity] = useState("")
   const [validationMessage, setValidationMessage] = useState("")
 
   useEffect(() => {
     if (job) {
+      setJobName(job.jobName)
+      setDescription(job.description)
       setRate(job.rate.toString())
       setQuantity(job.quantity.toString())
       setValidationMessage("")
@@ -39,7 +43,7 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!job || !rate || !quantity) return
+    if (!job || !rate || !quantity || !jobName) return
 
     const parsedRate = parseFloat(rate)
     const parsedQuantity = parseInt(quantity)
@@ -57,7 +61,7 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
     }
 
     setValidationMessage("")
-    onSubmit(job.id, parsedRate, parsedQuantity)
+    onSubmit(job.id, jobName, description, parsedRate, parsedQuantity)
     onOpenChange(false)
   }
 
@@ -75,10 +79,21 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Job Name</Label>
-              <div className="flex h-9 w-full items-center rounded-md border bg-muted px-3 text-sm">
-                {job.jobName}
-              </div>
+              <Label htmlFor="editJobName">Job Name *</Label>
+              <Input
+                id="editJobName"
+                value={jobName}
+                onChange={(e) => setJobName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editDescription">Description</Label>
+              <Input
+                id="editDescription"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label>Current Qty Printed</Label>
@@ -88,7 +103,7 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="editRate">Rate per Unit (₦) *</Label>
+                <Label htmlFor="editRate">Rate per Unit (N) *</Label>
                 <Input
                   id="editRate"
                   type="number"

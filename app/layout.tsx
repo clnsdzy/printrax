@@ -11,6 +11,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Printrax - Print Job Tracker",
   description: "A print job tracking system for small internet cafés",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
 }
 
 export const viewport: Viewport = {
