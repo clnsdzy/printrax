@@ -57,8 +57,8 @@ export function StatsCards({
               <p className="text-xl font-semibold">
                 {stat.currency ? (
                   <span className="inline-flex items-baseline gap-1">
-                    <span className="text-inherit">₦</span>
-                    <span>{stat.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+                    <span className="text-inherit">N</span>
+                    <span>{stat.value.toLocaleString("en-US", { minimumFractionDigits: 0 })}</span>
                   </span>
                 ) : (
                   stat.value

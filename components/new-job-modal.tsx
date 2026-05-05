@@ -90,7 +90,7 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="rate">Rate per Unit (₦) *</Label>
+                <Label htmlFor="rate">Rate per Unit (N) *</Label>
                 <Input
                   id="rate"
                   type="number"

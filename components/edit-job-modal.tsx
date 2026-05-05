@@ -103,7 +103,7 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="editRate">Rate per Unit (₦) *</Label>
+                <Label htmlFor="editRate">Rate per Unit (N) *</Label>
                 <Input
                   id="editRate"
                   type="number"

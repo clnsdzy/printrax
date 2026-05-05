@@ -168,8 +168,8 @@ export default function JobDetailPage() {
 
   const formatCurrency = (value: number) =>
     value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     })
 
   return (
