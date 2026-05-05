@@ -46,10 +46,16 @@ export default function Dashboard() {
     setEditJobOpen(true)
   }
 
-  const handleUpdateJob = async (id: string, rate: number, quantity: number) => {
+  const handleUpdateJob = async (
+    id: string,
+    jobName: string,
+    description: string,
+    rate: number,
+    quantity: number
+  ) => {
     try {
       setError(null)
-      await updateJob(id, rate, quantity)
+      await updateJob(id, jobName, description, rate, quantity)
       setEditJobOpen(false)
     } catch (err) {
       console.error("[v0] Failed to update job:", err)

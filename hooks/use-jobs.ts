@@ -125,22 +125,29 @@ export function useJobs() {
     }
   }, [jobs])
 
-  const updateJob = useCallback(async (id: string, rate: number, quantity: number) => {
-    try {
-      const job = jobs.find((j) => j.id === id)
-      if (!job) return
+  const updateJob = useCallback(
+    async (
+      id: string,
+      jobName: string,
+      description: string,
+      rate: number,
+      quantity: number
+    ) => {
+      try {
+        const job = jobs.find((j) => j.id === id)
+        if (!job) return
 
-      const response = await fetch(`/api/jobs/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jobName: job.jobName,
-          description: job.description,
-          quantity: quantity,
-          quantityPrinted: job.quantityPrinted,
-          rate: rate,
-        }),
-      })
+        const response = await fetch(`/api/jobs/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jobName,
+            description,
+            quantity,
+            quantityPrinted: job.quantityPrinted,
+            rate,
+          }),
+        })
 
       if (!response.ok) throw new Error("Failed to update job")
       const data = await response.json()

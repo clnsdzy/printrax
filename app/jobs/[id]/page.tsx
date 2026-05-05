@@ -34,10 +34,16 @@ export default function JobDetailPage() {
     setEditJobOpen(true)
   }
 
-  const handleUpdateJob = async (id: string, rate: number, quantity: number) => {
+  const handleUpdateJob = async (
+    id: string,
+    jobName: string,
+    description: string,
+    rate: number,
+    quantity: number
+  ) => {
     try {
       setError(null)
-      await updateJob(id, rate, quantity)
+      await updateJob(id, jobName, description, rate, quantity)
       setEditJobOpen(false)
     } catch (err) {
       console.error("[v0] Failed to update job:", err)
@@ -190,7 +196,7 @@ export default function JobDetailPage() {
                     {formattedDate} at {formattedTime}
                   </p>
                 </div>
-                <Badge variant={getStatusBadgeVariant(job.status)} className="sm:ml-4 sm:inline">
+                <Badge variant={getStatusBadgeVariant(job.status)} className="inline-block sm:ml-4 sm:inline">
                   {getStatusLabel(job.status)}
                 </Badge>
               </div>
