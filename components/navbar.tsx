@@ -15,13 +15,13 @@ export function Navbar({ onNewJob }: NavbarProps) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <HugeiconsIcon icon={PrinterIcon} size={28} className="text-primary" />
-          <span className="text-xl font-bold tracking-tight">Printrax</span>
+          <span className="hidden text-xl font-bold tracking-tight sm:inline-block">Printrax</span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Button onClick={onNewJob}>
             <HugeiconsIcon icon={PlusSignIcon} size={16} />
-            New Job
+            <span className="hidden sm:inline">New Job</span>
           </Button>
         </div>
       </div>

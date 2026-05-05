@@ -125,6 +125,45 @@ export function useJobs() {
     }
   }, [jobs])
 
+  const updateJob = useCallback(async (id: string, rate: number, quantity: number) => {
+    try {
+      const job = jobs.find((j) => j.id === id)
+      if (!job) return
+
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobName: job.jobName,
+          description: job.description,
+          quantity: quantity,
+          quantityPrinted: job.quantityPrinted,
+          rate: rate,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to update job")
+      const data = await response.json()
+
+      const updatedJob: PrintJob = {
+        id: data.id,
+        jobName: data.job_name,
+        description: data.description,
+        quantity: data.quantity_ordered,
+        quantityPrinted: data.quantity_printed,
+        rate: parseFloat(data.rate_per_unit),
+        amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
+        status: deriveStatus(data.quantity_printed, data.quantity_ordered),
+        createdAt: data.created_at,
+      }
+
+      setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
+    } catch (error) {
+      console.error("[v0] Error updating job:", error)
+      throw error
+    }
+  }, [jobs])
+
   const deleteJob = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/jobs/${id}`, {
@@ -146,5 +185,5 @@ export function useJobs() {
     totalRevenue: jobs.reduce((acc, j) => acc + j.amount, 0),
   }
 
-  return { jobs, isLoading, isLoaded, addJob, updateProgress, deleteJob, stats }
+  return { jobs, isLoading, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats }
 }

@@ -11,6 +11,7 @@ import { PencilEdit02Icon, Delete02Icon, PrinterIcon } from "@hugeicons/core-fre
 interface JobsTableProps {
   jobs: PrintJob[]
   onUpdateProgress: (job: PrintJob) => void
+  onEdit: (job: PrintJob) => void
   onDelete: (job: PrintJob) => void
 }
 
@@ -36,7 +37,7 @@ function getStatusDotColor(status: PrintJob["status"]) {
   }
 }
 
-export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) {
+export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTableProps) {
   if (jobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -67,7 +68,7 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                       {job.jobName}
                     </h3>
                     <div
-                      className="mt-1 size-3 flex-shrink-0"
+                      className="mt-1 size-3 shrink-0"
                       style={{ backgroundColor: getStatusDotColor(job.status) }}
                       title={job.status}
                     />
@@ -89,15 +90,23 @@ export function JobsTable({ jobs, onUpdateProgress, onDelete }: JobsTableProps) 
                   </div>
 
                   {/* Actions Section */}
-                  <div className="flex gap-2 pt-2" onClick={(e) => e.preventDefault()}>
+                  <div className="flex flex-wrap gap-2 pt-2" onClick={(e) => e.preventDefault()}>
                     <Button
                       variant="outline"
                       size="sm"
                       className="flex-1"
                       onClick={() => onUpdateProgress(job)}
                     >
-                      <HugeiconsIcon icon={PencilEdit02Icon} size={16} data-icon="inline-start" />
-                      Update
+                      <HugeiconsIcon icon={PrinterIcon} size={16} data-icon="inline-start" />
+                      Progress
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(job)}
+                      title="Edit job"
+                    >
+                      <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
                     </Button>
                     <Button
                       variant="outline"
