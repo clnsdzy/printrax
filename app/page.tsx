@@ -8,12 +8,14 @@ import { StatsCards } from "@/components/stats-cards"
 import { JobsTable } from "@/components/jobs-table"
 import { NewJobModal } from "@/components/new-job-modal"
 import { UpdateProgressModal } from "@/components/update-progress-modal"
+import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 
 export default function Dashboard() {
-  const { jobs, isLoaded, addJob, updateProgress, deleteJob, stats } = useJobs()
+  const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
   const [newJobOpen, setNewJobOpen] = useState(false)
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
+  const [editJobOpen, setEditJobOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -37,6 +39,22 @@ export default function Dashboard() {
   const handleUpdateProgress = (job: PrintJob) => {
     setSelectedJob(job)
     setUpdateProgressOpen(true)
+  }
+
+  const handleEditJob = (job: PrintJob) => {
+    setSelectedJob(job)
+    setEditJobOpen(true)
+  }
+
+  const handleUpdateJob = async (id: string, rate: number, quantity: number) => {
+    try {
+      setError(null)
+      await updateJob(id, rate, quantity)
+      setEditJobOpen(false)
+    } catch (err) {
+      console.error("[v0] Failed to update job:", err)
+      setError(err instanceof Error ? err.message : "Failed to update job")
+    }
   }
 
   const handleDelete = (job: PrintJob) => {
@@ -68,6 +86,7 @@ export default function Dashboard() {
           <JobsTable
             jobs={jobs}
             onUpdateProgress={handleUpdateProgress}
+            onEdit={handleEditJob}
             onDelete={handleDelete}
           />
         </div>
@@ -90,6 +109,13 @@ export default function Dashboard() {
         open={updateProgressOpen}
         onOpenChange={setUpdateProgressOpen}
         onSubmit={updateProgress}
+      />
+
+      <EditJobModal
+        job={selectedJob}
+        open={editJobOpen}
+        onOpenChange={setEditJobOpen}
+        onSubmit={handleUpdateJob}
       />
 
       <DeleteConfirmModal

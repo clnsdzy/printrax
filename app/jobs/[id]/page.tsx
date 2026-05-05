@@ -10,23 +10,40 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { UpdateProgressModal } from "@/components/update-progress-modal"
+import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 import { NewJobModal } from "@/components/new-job-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeftIcon } from "@hugeicons/core-free-icons"
+import { ArrowLeftIcon, PencilEdit02Icon, Delete02Icon } from "@hugeicons/core-free-icons"
 
 export default function JobDetailPage() {
   const router = useRouter()
   const params = useParams()
   const jobId = params.id as string
-  const { jobs, isLoaded, updateProgress, deleteJob, addJob } = useJobs()
+  const { jobs, isLoaded, updateProgress, updateJob, deleteJob, addJob } = useJobs()
 
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
+  const [editJobOpen, setEditJobOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [newJobOpen, setNewJobOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const job = useMemo(() => jobs.find((j) => j.id === jobId), [jobs, jobId])
+
+  const handleEditJob = (job: PrintJob) => {
+    setEditJobOpen(true)
+  }
+
+  const handleUpdateJob = async (id: string, rate: number, quantity: number) => {
+    try {
+      setError(null)
+      await updateJob(id, rate, quantity)
+      setEditJobOpen(false)
+    } catch (err) {
+      console.error("[v0] Failed to update job:", err)
+      setError(err instanceof Error ? err.message : "Failed to update job")
+    }
+  }
 
   const handleDelete = () => {
     setDeleteConfirmOpen(true)
@@ -143,6 +160,12 @@ export default function JobDetailPage() {
     minute: "2-digit",
   })
 
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onNewJob={() => setNewJobOpen(true)} />
@@ -160,14 +183,14 @@ export default function JobDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-3xl">{job.jobName}</CardTitle>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Created on {formattedDate} at {formattedTime}
+                    {formattedDate} at {formattedTime}
                   </p>
                 </div>
-                <Badge variant={getStatusBadgeVariant(job.status)} className="ml-4">
+                <Badge variant={getStatusBadgeVariant(job.status)} className="sm:ml-4 sm:inline">
                   {getStatusLabel(job.status)}
                 </Badge>
               </div>
@@ -240,8 +263,8 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">?</span>
-                      <span>{job.rate.toFixed(2)}</span>
+                      <span className="text-inherit">N</span>
+                      <span>{formatCurrency(job.rate)}</span>
                     </span>
                   </p>
                 </div>
@@ -251,8 +274,8 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">?</span>
-                      <span>{job.amount.toFixed(2)}</span>
+                      <span className="text-inherit">N</span>
+                      <span>{formatCurrency(job.amount)}</span>
                     </span>
                   </p>
                 </div>
@@ -262,8 +285,8 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">?</span>
-                      <span>{(job.rate * job.quantityPrinted).toFixed(2)}</span>
+                      <span className="text-inherit">N</span>
+                      <span>{formatCurrency(job.rate * job.quantityPrinted)}</span>
                     </span>
                   </p>
                 </div>
@@ -273,8 +296,8 @@ export default function JobDetailPage() {
                   </p>
                   <p className="mt-1 text-2xl font-bold">
                     <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">?</span>
-                      <span>{(job.rate * remainingQuantity).toFixed(2)}</span>
+                      <span className="text-inherit">N</span>
+                      <span>{formatCurrency(job.rate * remainingQuantity)}</span>
                     </span>
                   </p>
                 </div>
@@ -286,8 +309,21 @@ export default function JobDetailPage() {
             <CardHeader>
               <CardTitle>Actions</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Button variant="destructive" onClick={handleDelete} className="w-full">
+            <CardContent className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                variant="outline"
+                onClick={() => handleEditJob(job)}
+                className="w-full sm:flex-2"
+              >
+                <HugeiconsIcon icon={PencilEdit02Icon} size={16} data-icon="inline-start" />
+                Edit Job
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                className="w-full sm:flex-1"
+              >
+                <HugeiconsIcon icon={Delete02Icon} size={16} data-icon="inline-start" />
                 Delete Job
               </Button>
             </CardContent>
@@ -300,6 +336,13 @@ export default function JobDetailPage() {
         open={updateProgressOpen}
         onOpenChange={setUpdateProgressOpen}
         onSubmit={updateProgress}
+      />
+
+      <EditJobModal
+        job={job}
+        open={editJobOpen}
+        onOpenChange={setEditJobOpen}
+        onSubmit={handleUpdateJob}
       />
 
       <DeleteConfirmModal
