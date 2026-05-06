@@ -1,135 +1,80 @@
-"use client"
+import Link from "next/link"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { PrinterIcon } from "@hugeicons/core-free-icons"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { useState } from "react"
-import { PrintJob } from "@/types/job"
-import { useJobs } from "@/hooks/use-jobs"
-import { Navbar } from "@/components/navbar"
-import { StatsCards } from "@/components/stats-cards"
-import { JobsTable } from "@/components/jobs-table"
-import { NewJobModal } from "@/components/new-job-modal"
-import { UpdateProgressModal } from "@/components/update-progress-modal"
-import { EditJobModal } from "@/components/edit-job-modal"
-import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
+const features = [
+  {
+    title: "Track jobs in one place",
+    description: "Create, edit, and organize all print jobs from a single dashboard.",
+  },
+  {
+    title: "Monitor production progress",
+    description: "Update quantities as you print and instantly see completion status.",
+  },
+  {
+    title: "See revenue at a glance",
+    description: "Get quick totals for active jobs, completed jobs, and expected revenue.",
+  },
+]
 
-export default function Dashboard() {
-  const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
-  const [newJobOpen, setNewJobOpen] = useState(false)
-  const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
-  const [editJobOpen, setEditJobOpen] = useState(false)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleAddJob = async (data: {
-    jobName: string
-    description: string
-    rate: number
-    quantity: number
-  }) => {
-    try {
-      setError(null)
-      await addJob(data)
-      setNewJobOpen(false)
-    } catch (err) {
-      console.error("[v0] Failed to add job:", err)
-      setError(err instanceof Error ? err.message : "Failed to create job")
-    }
-  }
-
-  const handleUpdateProgress = (job: PrintJob) => {
-    setSelectedJob(job)
-    setUpdateProgressOpen(true)
-  }
-
-  const handleEditJob = (job: PrintJob) => {
-    setSelectedJob(job)
-    setEditJobOpen(true)
-  }
-
-  const handleUpdateJob = async (
-    id: string,
-    jobName: string,
-    description: string,
-    rate: number,
-    quantity: number
-  ) => {
-    try {
-      setError(null)
-      await updateJob(id, jobName, description, rate, quantity)
-      setEditJobOpen(false)
-    } catch (err) {
-      console.error("[v0] Failed to update job:", err)
-      setError(err instanceof Error ? err.message : "Failed to update job")
-    }
-  }
-
-  const handleDelete = (job: PrintJob) => {
-    setSelectedJob(job)
-    setDeleteConfirmOpen(true)
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    )
-  }
-
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onNewJob={() => setNewJobOpen(true)} />
-      
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          <StatsCards
-            totalJobs={stats.totalJobs}
-            inProgress={stats.inProgress}
-            completed={stats.completed}
-            totalRevenue={stats.totalRevenue}
-          />
-          
-          <JobsTable
-            jobs={jobs}
-            onUpdateProgress={handleUpdateProgress}
-            onEdit={handleEditJob}
-            onDelete={handleDelete}
-          />
+      <header className="border-b bg-card">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <HugeiconsIcon icon={PrinterIcon} size={28} className="text-primary" />
+            <span className="text-xl font-bold tracking-tight">Printrax</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild variant="outline">
+              <Link href="/auth/login">Login</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/auth/sign-up">Sign up</Link>
+            </Button>
+          </div>
         </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <section className="mx-auto max-w-3xl space-y-6 text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Simple print job tracking for growing print shops
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Printrax helps you manage print orders, monitor progress, and keep your revenue visible with a clean workflow.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button asChild size="lg">
+              <Link href="/auth/sign-up">Get started</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/dashboard">Open dashboard</Link>
+            </Button>
+          </div>
+        </section>
+
+        <section className="mt-12 grid gap-4 md:grid-cols-3">
+          {features.map((feature) => (
+            <Card
+              key={feature.title}
+              className="transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-md"
+            >
+              <CardHeader>
+                <CardTitle className="text-lg">{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
       </main>
-
-      <NewJobModal
-        open={newJobOpen}
-        onOpenChange={setNewJobOpen}
-        onSubmit={handleAddJob}
-      />
-      
-      {error && (
-        <div className="fixed bottom-4 right-4 z-50 bg-red-50 border border-red-200 rounded-md p-4 max-w-sm">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-
-      <UpdateProgressModal
-        job={selectedJob}
-        open={updateProgressOpen}
-        onOpenChange={setUpdateProgressOpen}
-        onSubmit={updateProgress}
-      />
-
-      <EditJobModal
-        job={selectedJob}
-        open={editJobOpen}
-        onOpenChange={setEditJobOpen}
-        onSubmit={handleUpdateJob}
-      />
-
-      <DeleteConfirmModal
-        job={selectedJob}
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        onConfirm={deleteJob}
-      />
     </div>
   )
 }
