@@ -8,6 +8,13 @@ export async function GET(
   try {
     const { id } = await params
     const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const { data, error } = await supabase
       .from('print_jobs')
@@ -20,7 +27,7 @@ export async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to fetch job' },
       { status: 500 }
@@ -35,6 +42,13 @@ export async function PATCH(
   try {
     const { id } = await params
     const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const body = await request.json()
 
     const { data, error } = await supabase
@@ -54,7 +68,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(data[0])
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to update job' },
       { status: 500 }
@@ -69,6 +83,13 @@ export async function DELETE(
   try {
     const { id } = await params
     const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const { error } = await supabase
       .from('print_jobs')
@@ -80,7 +101,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to delete job' },
       { status: 500 }

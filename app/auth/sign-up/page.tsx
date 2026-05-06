@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation"
-import { DashboardPage } from "@/components/dashboard-page"
+import { AuthForm } from "@/components/auth-form"
 import { createClient } from "@/lib/supabase/server"
 
-export default async function Dashboard() {
+export default async function SignUpPage() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect("/auth/login")
+  if (user) {
+    redirect("/")
   }
 
-  return <DashboardPage />
+  return <AuthForm mode="signup" />
 }
