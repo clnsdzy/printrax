@@ -49,7 +49,7 @@ export function StatsCards({
       {stats.map((stat) => (
         <Card key={stat.label}>
           <CardContent className="flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+            <div className="md:flex h-10 w-10 items-center justify-center rounded-lg bg-muted hidden md:block">
               <HugeiconsIcon icon={stat.icon} size={20} className="text-muted-foreground" />
             </div>
             <div>

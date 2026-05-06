@@ -1,6 +1,7 @@
 import Link from "next/link"
+import Image from "next/image"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { PrinterIcon } from "@hugeicons/core-free-icons"
+import { GridIcon, User02Icon } from "@hugeicons/core-free-icons"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,13 +27,15 @@ export default function HomePage() {
       <header className="border-b bg-card">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <HugeiconsIcon icon={PrinterIcon} size={28} className="text-primary" />
-            <span className="text-xl font-bold tracking-tight">Printrax</span>
+            <HugeiconsIcon icon={GridIcon} size={24} className="text-primary" />
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button asChild variant="outline">
-              <Link href="/auth/login">Login</Link>
+            <Button asChild variant={"outline"}>
+              <Link href="/auth/login">
+                <HugeiconsIcon icon={User02Icon} size={28} className="text-primary md:hidden" />
+                <span className="hidden md:block">Login</span>
+              </Link>
             </Button>
             <Button asChild>
               <Link href="/auth/sign-up">Sign up</Link>
@@ -44,10 +47,10 @@ export default function HomePage() {
       <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-3xl space-y-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Simple print job tracking for growing print shops
+            Print tracking for small to medium cybercafes
           </h1>
           <p className="text-lg text-muted-foreground">
-            Printrax helps you manage print orders, monitor progress, and keep your revenue visible with a clean workflow.
+            Printrax helps you manage print orders and monitor progress with a simple, clean workflow.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -75,6 +78,10 @@ export default function HomePage() {
           ))}
         </section>
       </main>
+
+      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
+        <p>&copy; {new Date().getFullYear()} Printrax. All rights reserved.</p>
+      </footer>
     </div>
   )
 }

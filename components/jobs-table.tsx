@@ -64,9 +64,14 @@ export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTabl
                 <CardContent className="flex flex-1 flex-col gap-4 p-6">
                   {/* Header with title and status dot */}
                   <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-lg font-bold leading-tight">
-                      {job.jobName}
-                    </h3>
+                    <div>
+                      <h3 className="text-lg font-bold leading-tight">
+                        {job.jobName}
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        #{job.id.slice(-6)}
+                      </span>
+                    </div>
                     <div
                       className="mt-1 size-3 shrink-0"
                       style={{ backgroundColor: getStatusDotColor(job.status) }}
@@ -97,8 +102,8 @@ export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTabl
                       className="flex-1"
                       onClick={() => onUpdateProgress(job)}
                     >
-                      <HugeiconsIcon icon={PrinterIcon} size={16} data-icon="inline-start" />
-                      Progress
+                      
+                      Update Progress
                     </Button>
                     <Button
                       variant="outline"
