@@ -49,7 +49,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
 
       if (data.session) {
-        router.replace("/")
+        router.replace("/dashboard")
         router.refresh()
         setIsLoading(false)
         return
@@ -72,7 +72,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       return
     }
 
-    router.replace("/")
+    router.replace("/dashboard")
     router.refresh()
     setIsLoading(false)
   }

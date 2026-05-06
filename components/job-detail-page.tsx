@@ -59,7 +59,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
 
   const handleConfirmDelete = (id: string) => {
     deleteJob(id)
-    router.push("/")
+    router.push("/dashboard")
   }
 
   const handleAddJob = async (data: {
@@ -72,7 +72,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
       setError(null)
       await addJob(data)
       setNewJobOpen(false)
-      router.push("/")
+      router.push("/dashboard")
     } catch (err) {
       console.error("[v0] Failed to add job:", err)
       setError(err instanceof Error ? err.message : "Failed to create job")
@@ -96,7 +96,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
           <Button
             variant="outline"
             className="mb-6"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/dashboard")}
           >
             <HugeiconsIcon icon={ArrowLeftIcon} size={16} className="mr-2" />
             Back
@@ -182,7 +182,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
         <Button
           variant="outline"
           className="mb-6"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/dashboard")}
         >
           <HugeiconsIcon icon={ArrowLeftIcon} size={16} className="mr-2" />
           Dashboard
