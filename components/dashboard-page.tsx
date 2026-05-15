@@ -20,7 +20,7 @@ export function DashboardPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useState("ongoing")
 
   const handleAddJob = async (data: {
     jobName: string
