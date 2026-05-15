@@ -86,6 +86,20 @@ export function DashboardPage() {
 
   const filteredJobs = getFilteredJobs()
 
+  const getJobCount = (status: string) => {
+    switch (status) {
+      case "completed":
+        return jobs.filter((job) => job.status === "completed").length
+      case "ongoing":
+        return jobs.filter((job) => job.status === "in_progress").length
+      case "not_started":
+        return jobs.filter((job) => job.status === "not_started").length
+      case "all":
+      default:
+        return jobs.length
+    }
+  }
+
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -111,10 +125,10 @@ export function DashboardPage() {
             <h2 className="text-2xl font-bold">Print Jobs</h2>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
-                <TabsTrigger value="not_started">Not Started</TabsTrigger>
+                <TabsTrigger value="all">All ({getJobCount("all")})</TabsTrigger>
+                <TabsTrigger value="completed">Completed ({getJobCount("completed")})</TabsTrigger>
+                <TabsTrigger value="ongoing">Ongoing ({getJobCount("ongoing")})</TabsTrigger>
+                <TabsTrigger value="not_started">Not Started ({getJobCount("not_started")})</TabsTrigger>
               </TabsList>
               <TabsContent value={activeTab} className="mt-6">
                 <JobsTable
