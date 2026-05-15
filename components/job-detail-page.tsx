@@ -88,7 +88,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     // Title
     doc.setTextColor(37, 99, 235) // blue-600
     doc.setFontSize(24)
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.text("Print Job Receipt", 20, yPosition)
     
     yPosition += 15
@@ -101,10 +101,10 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     // Job Details Section
     doc.setTextColor(30, 30, 30) // near black
     doc.setFontSize(11)
-    doc.setFont(undefined, "normal")
+    doc.setFont("helvetica", "normal")
     
     // Job Title
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(107, 114, 128) // gray-500
     doc.text("Job Title:", 20, yPosition)
     doc.setTextColor(30, 30, 30)
@@ -118,7 +118,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
       month: "long",
       day: "numeric",
     })
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(107, 114, 128)
     doc.text("Date:", 20, yPosition)
     doc.setTextColor(30, 30, 30)
@@ -128,7 +128,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     // Financial Details Section
     doc.setTextColor(37, 99, 235)
     doc.setFontSize(12)
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.text("Financial Summary", 20, yPosition)
     yPosition += 10
     
@@ -138,10 +138,10 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     
     doc.setTextColor(30, 30, 30)
     doc.setFontSize(10)
-    doc.setFont(undefined, "normal")
+    doc.setFont("helvetica", "normal")
     
     // Total Quantity
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(107, 114, 128)
     doc.text("Total Quantity:", 25, yPosition)
     doc.setTextColor(30, 30, 30)
@@ -149,7 +149,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     yPosition += 8
     
     // Rate Per Unit
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(107, 114, 128)
     doc.text("Rate Per Unit:", 25, yPosition)
     doc.setTextColor(30, 30, 30)
@@ -157,19 +157,19 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     yPosition += 8
     
     // Amount
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.setTextColor(107, 114, 128)
     doc.text("Total Amount:", 25, yPosition)
     doc.setTextColor(37, 99, 235)
     doc.setFontSize(11)
-    doc.setFont(undefined, "bold")
+    doc.setFont("helvetica", "bold")
     doc.text(`₦${job.amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
     
     // Footer
     yPosition += 35
     doc.setTextColor(107, 114, 128)
     doc.setFontSize(8)
-    doc.setFont(undefined, "normal")
+    doc.setFont("helvetica", "normal")
     doc.text("This is a system-generated receipt for the completed print job.", 20, yPosition)
     
     // Save the PDF
