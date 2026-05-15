@@ -1,20 +1,39 @@
 "use client"
 import { useCallback, useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useTheme } from "@/components/theme-provider"
 import { createClient } from "@/lib/supabase/client"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { PlusSignIcon, GridIcon } from "@hugeicons/core-free-icons"
+import {
+  ComputerIcon,
+  GridIcon,
+  Logout03Icon,
+  Moon02Icon,
+  PlusSignIcon,
+  Settings01Icon,
+  SunIcon,
+  UserCircleIcon,
+  UserIcon,
+} from "@hugeicons/core-free-icons"
 
 interface NavbarProps {
-  onNewJob: () => void
+  onNewJob?: () => void
 }
 const AUTO_LOGOUT_MS = 10 * 60 * 1000
 
 export function Navbar({ onNewJob }: NavbarProps) {
   const router = useRouter()
+  const { setTheme } = useTheme()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -82,14 +101,53 @@ export function Navbar({ onNewJob }: NavbarProps) {
           <HugeiconsIcon icon={GridIcon} size={24} className="text-primary" />
         </div>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button variant="outline" onClick={handleLogout} disabled={isSigningOut}>
-            {isSigningOut ? "Signing out..." : "Logout"}
-          </Button>
-          <Button onClick={onNewJob}>
-            <HugeiconsIcon icon={PlusSignIcon} size={16} />
-            <span className="hidden sm:inline">New Job</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Open profile menu">
+                <HugeiconsIcon icon={UserCircleIcon} size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <HugeiconsIcon icon={UserIcon} size={16} />
+                  My Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HugeiconsIcon icon={Settings01Icon} size={16} />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <HugeiconsIcon icon={SunIcon} size={16} />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <HugeiconsIcon icon={Moon02Icon} size={16} />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <HugeiconsIcon icon={ComputerIcon} size={16} />
+                System
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleLogout}
+                disabled={isSigningOut}
+              >
+                <HugeiconsIcon icon={Logout03Icon} size={16} />
+                {isSigningOut ? "Signing out..." : "Logout"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {onNewJob && (
+            <Button onClick={onNewJob}>
+              <HugeiconsIcon icon={PlusSignIcon} size={16} />
+              <span className="hidden sm:inline">New Job</span>
+            </Button>
+          )}
         </div>
       </div>
     </header>

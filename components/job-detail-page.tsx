@@ -82,98 +82,47 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
 
   const handleExportPDF = (job: PrintJob) => {
     const doc = new jsPDF()
-    
-    let yPosition = 20
-    
-    // Title
-    doc.setTextColor(37, 99, 235) // blue-600
-    doc.setFontSize(24)
-    doc.setFont("helvetica", "bold")
-    doc.text("Print Job Receipt", 20, yPosition)
-    
-    yPosition += 15
-    
-    // Divider line
-    doc.setDrawColor(37, 99, 235)
-    doc.line(20, yPosition, 190, yPosition)
-    yPosition += 10
-    
-    // Job Details Section
-    doc.setTextColor(30, 30, 30) // near black
-    doc.setFontSize(11)
-    doc.setFont("helvetica", "normal")
-    
-    // Job Title
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(107, 114, 128) // gray-500
-    doc.text("Job Title:", 20, yPosition)
-    doc.setTextColor(30, 30, 30)
-    doc.text(job.jobName, 80, yPosition)
-    yPosition += 10
-    
-    // Date (no time)
     const createdDate = new Date(job.createdAt)
     const formattedDate = createdDate.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     })
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(107, 114, 128)
-    doc.text("Date:", 20, yPosition)
-    doc.setTextColor(30, 30, 30)
-    doc.text(formattedDate, 80, yPosition)
-    yPosition += 15
-    
-    // Financial Details Section
+    const formatPdfCurrency = (value: number) =>
+      `N ${value.toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })}`
+    const details = [
+      ["Job Title", job.jobName],
+      ["Date", formattedDate],
+      ["Total Quantity", job.quantity.toString()],
+      ["Rate", formatPdfCurrency(job.rate)],
+      ["Total Amount", formatPdfCurrency(job.amount)],
+    ]
+
     doc.setTextColor(37, 99, 235)
-    doc.setFontSize(12)
+    doc.setFontSize(22)
     doc.setFont("helvetica", "bold")
-    doc.text("Financial Summary", 20, yPosition)
-    yPosition += 10
-    
-    // Details box
-    doc.setFillColor(245, 245, 245)
-    doc.rect(20, yPosition - 2, 170, 40, "F")
-    
-    doc.setTextColor(30, 30, 30)
-    doc.setFontSize(10)
-    doc.setFont("helvetica", "normal")
-    
-    // Total Quantity
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(107, 114, 128)
-    doc.text("Total Quantity:", 25, yPosition)
-    doc.setTextColor(30, 30, 30)
-    doc.text(job.quantity.toString(), 80, yPosition)
-    yPosition += 8
-    
-    // Rate Per Unit
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(107, 114, 128)
-    doc.text("Rate Per Unit:", 25, yPosition)
-    doc.setTextColor(30, 30, 30)
-    doc.text(`₦${job.rate.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
-    yPosition += 8
-    
-    // Amount
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(107, 114, 128)
-    doc.text("Total Amount:", 25, yPosition)
-    doc.setTextColor(37, 99, 235)
-    doc.setFontSize(11)
-    doc.setFont("helvetica", "bold")
-    doc.text(`₦${job.amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
-    
-    // Footer
-    yPosition += 35
-    doc.setTextColor(107, 114, 128)
-    doc.setFontSize(8)
-    doc.setFont("helvetica", "normal")
-    doc.text("This is a system-generated receipt for the completed print job.", 20, yPosition)
-    
-    // Save the PDF
-    doc.save(`${job.jobName}-receipt.pdf`)
+    doc.text("Print Job Summary", 20, 22)
+
+    doc.setDrawColor(37, 99, 235)
+    doc.line(20, 30, 190, 30)
+
+    details.forEach(([label, value], index) => {
+      const yPosition = 45 + index * 12
+
+      doc.setFontSize(11)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(107, 114, 128)
+      doc.text(`${label}:`, 20, yPosition)
+
+      doc.setFont("helvetica", "normal")
+      doc.setTextColor(30, 30, 30)
+      doc.text(value, 80, yPosition)
+    })
+
+    doc.save(`${job.jobName}-summary.pdf`)
   }
 
   if (!isLoaded) {
@@ -291,9 +240,10 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-3xl">{job.jobName}</CardTitle>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {formattedDate} at {formattedTime}
-                  </p>
+                  <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                    <p>Job ID: {job.id}</p>
+                    <p>{formattedDate} at {formattedTime}</p>
+                  </div>
                 </div>
                 <Badge variant={getStatusBadgeVariant(job.status)} className="inline-block sm:ml-4 sm:inline">
                   {getStatusLabel(job.status)}
@@ -415,15 +365,13 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 sm:flex-row">
-              {job.status === "completed" && (
-                <Button
-                  onClick={() => handleExportPDF(job)}
-                  className="w-full sm:flex-1"
-                >
-                  <HugeiconsIcon icon={Download04Icon} size={16} data-icon="inline-start" />
-                  Export PDF
-                </Button>
-              )}
+              <Button
+                onClick={() => handleExportPDF(job)}
+                className="w-full sm:flex-1"
+              >
+                <HugeiconsIcon icon={Download04Icon} size={16} data-icon="inline-start" />
+                Export PDF
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleEditJob}

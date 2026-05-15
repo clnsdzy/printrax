@@ -47,7 +47,7 @@ export default function HomePage() {
       <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-3xl space-y-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Print tracking for small to medium cybercafes
+           Simple Print Management Built for Cybercafés
           </h1>
           <p className="text-lg text-muted-foreground">
             Printrax helps you manage print orders and monitor progress with a simple, clean workflow.
