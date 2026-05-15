@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { jsPDF } from "jspdf"
 import { PrintJob } from "@/types/job"
 import { useJobs } from "@/hooks/use-jobs"
 import { Navbar } from "@/components/navbar"
@@ -14,7 +15,7 @@ import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 import { NewJobModal } from "@/components/new-job-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeftIcon, PencilEdit02Icon, Delete02Icon } from "@hugeicons/core-free-icons"
+import { ArrowLeftIcon, PencilEdit02Icon, Delete02Icon, Download04Icon } from "@hugeicons/core-free-icons"
 
 interface JobDetailPageClientProps {
   jobId: string
@@ -77,6 +78,102 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
       console.error("[v0] Failed to add job:", err)
       setError(err instanceof Error ? err.message : "Failed to create job")
     }
+  }
+
+  const handleExportPDF = (job: PrintJob) => {
+    const doc = new jsPDF()
+    
+    let yPosition = 20
+    
+    // Title
+    doc.setTextColor(37, 99, 235) // blue-600
+    doc.setFontSize(24)
+    doc.setFont("helvetica", "bold")
+    doc.text("Print Job Receipt", 20, yPosition)
+    
+    yPosition += 15
+    
+    // Divider line
+    doc.setDrawColor(37, 99, 235)
+    doc.line(20, yPosition, 190, yPosition)
+    yPosition += 10
+    
+    // Job Details Section
+    doc.setTextColor(30, 30, 30) // near black
+    doc.setFontSize(11)
+    doc.setFont("helvetica", "normal")
+    
+    // Job Title
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(107, 114, 128) // gray-500
+    doc.text("Job Title:", 20, yPosition)
+    doc.setTextColor(30, 30, 30)
+    doc.text(job.jobName, 80, yPosition)
+    yPosition += 10
+    
+    // Date (no time)
+    const createdDate = new Date(job.createdAt)
+    const formattedDate = createdDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(107, 114, 128)
+    doc.text("Date:", 20, yPosition)
+    doc.setTextColor(30, 30, 30)
+    doc.text(formattedDate, 80, yPosition)
+    yPosition += 15
+    
+    // Financial Details Section
+    doc.setTextColor(37, 99, 235)
+    doc.setFontSize(12)
+    doc.setFont("helvetica", "bold")
+    doc.text("Financial Summary", 20, yPosition)
+    yPosition += 10
+    
+    // Details box
+    doc.setFillColor(245, 245, 245)
+    doc.rect(20, yPosition - 2, 170, 40, "F")
+    
+    doc.setTextColor(30, 30, 30)
+    doc.setFontSize(10)
+    doc.setFont("helvetica", "normal")
+    
+    // Total Quantity
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(107, 114, 128)
+    doc.text("Total Quantity:", 25, yPosition)
+    doc.setTextColor(30, 30, 30)
+    doc.text(job.quantity.toString(), 80, yPosition)
+    yPosition += 8
+    
+    // Rate Per Unit
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(107, 114, 128)
+    doc.text("Rate Per Unit:", 25, yPosition)
+    doc.setTextColor(30, 30, 30)
+    doc.text(`₦${job.rate.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
+    yPosition += 8
+    
+    // Amount
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(107, 114, 128)
+    doc.text("Total Amount:", 25, yPosition)
+    doc.setTextColor(37, 99, 235)
+    doc.setFontSize(11)
+    doc.setFont("helvetica", "bold")
+    doc.text(`₦${job.amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
+    
+    // Footer
+    yPosition += 35
+    doc.setTextColor(107, 114, 128)
+    doc.setFontSize(8)
+    doc.setFont("helvetica", "normal")
+    doc.text("This is a system-generated receipt for the completed print job.", 20, yPosition)
+    
+    // Save the PDF
+    doc.save(`${job.jobName}-receipt.pdf`)
   }
 
   if (!isLoaded) {
@@ -318,6 +415,15 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 sm:flex-row">
+              {job.status === "completed" && (
+                <Button
+                  onClick={() => handleExportPDF(job)}
+                  className="w-full sm:flex-1"
+                >
+                  <HugeiconsIcon icon={Download04Icon} size={16} data-icon="inline-start" />
+                  Export PDF
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={handleEditJob}

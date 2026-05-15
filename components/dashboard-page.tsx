@@ -10,6 +10,7 @@ import { NewJobModal } from "@/components/new-job-modal"
 import { UpdateProgressModal } from "@/components/update-progress-modal"
 import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export function DashboardPage() {
   const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
@@ -19,6 +20,7 @@ export function DashboardPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("all")
 
   const handleAddJob = async (data: {
     jobName: string
@@ -68,6 +70,36 @@ export function DashboardPage() {
     setDeleteConfirmOpen(true)
   }
 
+  const getFilteredJobs = () => {
+    switch (activeTab) {
+      case "completed":
+        return jobs.filter((job) => job.status === "completed")
+      case "ongoing":
+        return jobs.filter((job) => job.status === "in_progress")
+      case "not_started":
+        return jobs.filter((job) => job.status === "not_started")
+      case "all":
+      default:
+        return jobs
+    }
+  }
+
+  const filteredJobs = getFilteredJobs()
+
+  const getJobCount = (status: string) => {
+    switch (status) {
+      case "completed":
+        return jobs.filter((job) => job.status === "completed").length
+      case "ongoing":
+        return jobs.filter((job) => job.status === "in_progress").length
+      case "not_started":
+        return jobs.filter((job) => job.status === "not_started").length
+      case "all":
+      default:
+        return jobs.length
+    }
+  }
+
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -89,12 +121,25 @@ export function DashboardPage() {
             totalRevenue={stats.totalRevenue}
           />
 
-          <JobsTable
-            jobs={jobs}
-            onUpdateProgress={handleUpdateProgress}
-            onEdit={handleEditJob}
-            onDelete={handleDelete}
-          />
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Print Jobs</h2>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="all">All ({getJobCount("all")})</TabsTrigger>
+                <TabsTrigger value="completed">Completed ({getJobCount("completed")})</TabsTrigger>
+                <TabsTrigger value="ongoing">Ongoing ({getJobCount("ongoing")})</TabsTrigger>
+                <TabsTrigger value="not_started">Not Started ({getJobCount("not_started")})</TabsTrigger>
+              </TabsList>
+              <TabsContent value={activeTab} className="mt-6">
+                <JobsTable
+                  jobs={filteredJobs}
+                  onUpdateProgress={handleUpdateProgress}
+                  onEdit={handleEditJob}
+                  onDelete={handleDelete}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
 
