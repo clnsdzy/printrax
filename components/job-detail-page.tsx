@@ -83,15 +83,10 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
   const handleExportPDF = (job: PrintJob) => {
     const doc = new jsPDF()
     
-    // Set colors
-    const primaryColor = [37, 99, 235] // blue-600
-    const textColor = [30, 30, 30] // near black
-    const lightColor = [107, 114, 128] // gray-500
-    
     let yPosition = 20
     
     // Title
-    doc.setTextColor(...primaryColor)
+    doc.setTextColor(37, 99, 235) // blue-600
     doc.setFontSize(24)
     doc.setFont(undefined, "bold")
     doc.text("Print Job Receipt", 20, yPosition)
@@ -99,20 +94,20 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     yPosition += 15
     
     // Divider line
-    doc.setDrawColor(...primaryColor)
+    doc.setDrawColor(37, 99, 235)
     doc.line(20, yPosition, 190, yPosition)
     yPosition += 10
     
     // Job Details Section
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30) // near black
     doc.setFontSize(11)
     doc.setFont(undefined, "normal")
     
     // Job Title
     doc.setFont(undefined, "bold")
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128) // gray-500
     doc.text("Job Title:", 20, yPosition)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30)
     doc.text(job.jobName, 80, yPosition)
     yPosition += 10
     
@@ -124,14 +119,14 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
       day: "numeric",
     })
     doc.setFont(undefined, "bold")
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128)
     doc.text("Date:", 20, yPosition)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30)
     doc.text(formattedDate, 80, yPosition)
     yPosition += 15
     
     // Financial Details Section
-    doc.setTextColor(...primaryColor)
+    doc.setTextColor(37, 99, 235)
     doc.setFontSize(12)
     doc.setFont(undefined, "bold")
     doc.text("Financial Summary", 20, yPosition)
@@ -141,38 +136,38 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     doc.setFillColor(245, 245, 245)
     doc.rect(20, yPosition - 2, 170, 40, "F")
     
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30)
     doc.setFontSize(10)
     doc.setFont(undefined, "normal")
     
     // Total Quantity
     doc.setFont(undefined, "bold")
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128)
     doc.text("Total Quantity:", 25, yPosition)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30)
     doc.text(job.quantity.toString(), 80, yPosition)
     yPosition += 8
     
     // Rate Per Unit
     doc.setFont(undefined, "bold")
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128)
     doc.text("Rate Per Unit:", 25, yPosition)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(30, 30, 30)
     doc.text(`₦${job.rate.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
     yPosition += 8
     
     // Amount
     doc.setFont(undefined, "bold")
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128)
     doc.text("Total Amount:", 25, yPosition)
-    doc.setTextColor(...primaryColor)
+    doc.setTextColor(37, 99, 235)
     doc.setFontSize(11)
     doc.setFont(undefined, "bold")
     doc.text(`₦${job.amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 80, yPosition)
     
     // Footer
     yPosition += 35
-    doc.setTextColor(...lightColor)
+    doc.setTextColor(107, 114, 128)
     doc.setFontSize(8)
     doc.setFont(undefined, "normal")
     doc.text("This is a system-generated receipt for the completed print job.", 20, yPosition)
