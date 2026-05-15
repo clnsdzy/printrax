@@ -33,7 +33,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     const supabase = createClient()
 
     if (isSignup) {
-      const emailRedirectTo = `${window.location.origin}/auth/callback`
+      const emailRedirectTo = "https://printrax.vercel.app/auth/callback"
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
