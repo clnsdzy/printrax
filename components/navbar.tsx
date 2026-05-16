@@ -20,7 +20,6 @@ import {
   Logout03Icon,
   Moon02Icon,
   PlusSignIcon,
-  Settings01Icon,
   SunIcon,
   UserCircleIcon,
   UserIcon,
@@ -36,6 +35,7 @@ export function Navbar({ onNewJob }: NavbarProps) {
   const { setTheme } = useTheme()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [userId, setUserId] = useState<string>("")
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearLogoutTimer = useCallback(() => {
@@ -75,6 +75,18 @@ export function Navbar({ onNewJob }: NavbarProps) {
   useEffect(() => {
     const savedRememberMe = localStorage.getItem("rememberMe") === "true"
     setRememberMe(savedRememberMe)
+    
+    const fetchUserId = async () => {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    
+    void fetchUserId()
   }, [])
 
   useEffect(() => {
@@ -106,10 +118,14 @@ export function Navbar({ onNewJob }: NavbarProps) {
   return (
     <header className="border-b bg-card">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <HugeiconsIcon icon={GridIcon} size={24} className="text-primary" />
-        </div>
-        <div className="flex items-center gap-2">
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground px-3 py-1 rounded-md bg-muted/50">
+            <HugeiconsIcon icon={UserIcon} size={14} />
+            <span className="font-mono">{userId.slice(-6)}</span>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open profile menu">
@@ -122,10 +138,6 @@ export function Navbar({ onNewJob }: NavbarProps) {
                   <HugeiconsIcon icon={UserIcon} size={16} />
                   My Profile
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <HugeiconsIcon icon={Settings01Icon} size={16} />
-                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setTheme("light")}>

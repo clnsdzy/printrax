@@ -220,6 +220,8 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
       maximumFractionDigits: 0,
     })
 
+  const getAbbreviatedId = (id: string) => `#${id.slice(-6)}`
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onNewJob={() => setNewJobOpen(true)} />
@@ -241,7 +243,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                 <div className="flex-1">
                   <CardTitle className="text-3xl">{job.jobName}</CardTitle>
                   <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                    <p>Job ID: {job.id}</p>
+                    <p>Job ID: {getAbbreviatedId(job.id)}</p>
                     <p>{formattedDate} at {formattedTime}</p>
                   </div>
                 </div>
