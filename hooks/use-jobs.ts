@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 import { PrintJob, deriveStatus, calculateAmount } from "@/types/job"
 
 export function useJobs() {
@@ -91,6 +92,8 @@ export function useJobs() {
       const job = jobs.find((j) => j.id === id)
       if (!job) return
 
+      const batchAdded = quantityPrinted - job.quantityPrinted
+
       const response = await fetch(`/api/jobs/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -119,8 +122,12 @@ export function useJobs() {
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
+      toast.success(`${updatedJob.jobName} updated`, {
+        description: `Added ${batchAdded} units to batch`,
+      })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
+      toast.error("Failed to update job")
       throw error
     }
   }, [jobs])
@@ -165,8 +172,12 @@ export function useJobs() {
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
+      toast.success(`${updatedJob.jobName} updated`, {
+        description: "Job details have been updated",
+      })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
+      toast.error("Failed to update job")
       throw error
     }
   }, [jobs])

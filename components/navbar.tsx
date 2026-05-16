@@ -122,22 +122,24 @@ export function Navbar({ onNewJob }: NavbarProps) {
           <HugeiconsIcon icon={GridIcon} size={24} className="text-primary" />
         </Link>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground px-3 py-1 rounded-md bg-muted/50">
-            <HugeiconsIcon icon={UserIcon} size={14} />
-            <span className="font-mono">{userId.slice(-6)}</span>
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open profile menu">
                 <HugeiconsIcon icon={UserCircleIcon} size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem asChild>
                 <Link href="/profile">
                   <HugeiconsIcon icon={UserIcon} size={16} />
                   My Profile
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-default hover:bg-transparent">
+                <div className="flex w-full items-center gap-2 text-sm text-muted-foreground">
+                  <span>ID:</span>
+                  <span className="font-mono font-medium text-foreground">{userId.slice(-6)}</span>
+                </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setTheme("light")}>
