@@ -19,6 +19,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -72,6 +73,12 @@ export function AuthForm({ mode }: AuthFormProps) {
       return
     }
 
+    if (rememberMe) {
+      localStorage.setItem("rememberMe", "true")
+    } else {
+      localStorage.removeItem("rememberMe")
+    }
+
     router.replace("/dashboard")
     router.refresh()
     setIsLoading(false)
@@ -115,6 +122,21 @@ export function AuthForm({ mode }: AuthFormProps) {
                 required
               />
             </div>
+
+            {!isSignup && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="rememberMe" className="cursor-pointer font-normal">
+                  Remember me
+                </Label>
+              </div>
+            )}
 
             {error && (
               <p className="text-sm text-red-600">{error}</p>

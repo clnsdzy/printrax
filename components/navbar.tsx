@@ -11,11 +11,12 @@ import { PlusSignIcon, GridIcon } from "@hugeicons/core-free-icons"
 interface NavbarProps {
   onNewJob: () => void
 }
-const AUTO_LOGOUT_MS = 10 * 60 * 1000
+const AUTO_LOGOUT_MS = 30 * 60 * 1000
 
 export function Navbar({ onNewJob }: NavbarProps) {
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearLogoutTimer = useCallback(() => {
@@ -34,6 +35,7 @@ export function Navbar({ onNewJob }: NavbarProps) {
       setIsSigningOut(true)
       const supabase = createClient()
       await supabase.auth.signOut()
+      localStorage.removeItem("rememberMe")
       clearLogoutTimer()
       setIsSigningOut(false)
       router.push(redirectPath)
@@ -44,10 +46,17 @@ export function Navbar({ onNewJob }: NavbarProps) {
 
   const resetLogoutTimer = useCallback(() => {
     clearLogoutTimer()
-    logoutTimerRef.current = setTimeout(() => {
-      void signOut("/auth/login?reason=timeout")
-    }, AUTO_LOGOUT_MS)
-  }, [clearLogoutTimer, signOut])
+    if (!rememberMe) {
+      logoutTimerRef.current = setTimeout(() => {
+        void signOut("/auth/login?reason=timeout")
+      }, AUTO_LOGOUT_MS)
+    }
+  }, [clearLogoutTimer, signOut, rememberMe])
+
+  useEffect(() => {
+    const savedRememberMe = localStorage.getItem("rememberMe") === "true"
+    setRememberMe(savedRememberMe)
+  }, [])
 
   useEffect(() => {
     resetLogoutTimer()
