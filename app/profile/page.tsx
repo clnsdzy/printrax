@@ -141,7 +141,7 @@ export default function ProfilePage() {
                     User ID
                   </dt>
                   <dd className="mt-1 break-all text-lg font-semibold">
-                    {getLastSixDigits(userId)}
+                    {userId ? getLastSixDigits(userId) : "Not available"}
                   </dd>
                 </div>
                 <div className="border-l-2 border-primary pl-4">
