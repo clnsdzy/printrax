@@ -1,12 +1,3 @@
-# printrax
-A webapp used to track medium to large-scale print jobs.
-
-## Supabase auth setup
-1. Create a `.env.local` file using `.env.example`.
-2. Fill in your Supabase project URL and anon key.
-3. In Supabase Auth settings, set your site URL to your app URL (for local dev use `http://localhost:3000`).
-4. Start the app with `npm run dev`.
-
-## Auth routes
-- `/auth/sign-up` for account creation
-- `/auth/login` for returning users
+# Printrax
+<img width="4986" height="2601" alt="ultramock-2026-05-15T15-06-14-727Z" src="https://github.com/user-attachments/assets/426957e7-7857-486a-8e8f-d5d35ec10a0c" />
+Simple Print Management Built for Cybercafés
