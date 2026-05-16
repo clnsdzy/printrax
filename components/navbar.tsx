@@ -123,7 +123,7 @@ export function Navbar({ onNewJob }: NavbarProps) {
         </Link>
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground px-3 py-1 rounded-md bg-muted/50">
-            <UserIcon size={14} />
+            <HugeiconsIcon icon={UserIcon} size={14} />
             <span className="font-mono">{userId.slice(-6)}</span>
           </div>
           <DropdownMenu>
