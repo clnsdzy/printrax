@@ -27,24 +27,29 @@ export function UpdateProgressModal({
   onOpenChange,
   onSubmit,
 }: UpdateProgressModalProps) {
-  const [quantityPrinted, setQuantityPrinted] = useState("")
+  const [newBatch, setNewBatch] = useState("")
 
   useEffect(() => {
-    if (job) {
-      setQuantityPrinted(job.quantityPrinted.toString())
+    if (open) {
+      setNewBatch("")
     }
-  }, [job])
+  }, [open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!job || !quantityPrinted) return
+    if (!job || !newBatch) return
 
-    const qty = parseInt(quantityPrinted)
-    if (qty < 0 || qty > job.quantity) return
+    const batchQty = parseInt(newBatch)
+    if (batchQty < 0) return
 
-    onSubmit(job.id, qty)
+    const newTotalQuantity = job.quantityPrinted + batchQty
+    if (newTotalQuantity > job.quantity) return
+
+    onSubmit(job.id, newTotalQuantity)
     onOpenChange(false)
   }
+
+  const remainingQuantity = job ? job.quantity - job.quantityPrinted : 0
 
   if (!job) return null
 
@@ -80,18 +85,18 @@ export function UpdateProgressModal({
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="newQuantity">Quantity Printed So Far *</Label>
+              <Label htmlFor="newBatch">New Batch *</Label>
               <Input
-                id="newQuantity"
+                id="newBatch"
                 type="number"
                 min="0"
-                max={job.quantity}
-                value={quantityPrinted}
-                onChange={(e) => setQuantityPrinted(e.target.value)}
+                max={remainingQuantity}
+                value={newBatch}
+                onChange={(e) => setNewBatch(e.target.value)}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Must be between 0 and {job.quantity}
+                Remaining quantity to print: {remainingQuantity}
               </p>
             </div>
           </div>
