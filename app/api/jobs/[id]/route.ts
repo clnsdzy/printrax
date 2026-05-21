@@ -51,6 +51,24 @@ export async function PATCH(
     }
     const body = await request.json()
 
+    // Get current batches
+    const { data: currentJob, error: fetchError } = await supabase
+      .from('print_jobs')
+      .select('batches')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    }
+
+    // Handle batches array
+    let batches = currentJob?.batches || []
+    if (body.newBatch !== undefined) {
+      // Add new batch value and keep only last 25
+      batches = [...batches, body.newBatch].slice(-25)
+    }
+
     const { data, error } = await supabase
       .from('print_jobs')
       .update({
@@ -59,6 +77,7 @@ export async function PATCH(
         quantity_ordered: parseInt(body.quantity),
         quantity_printed: parseInt(body.quantityPrinted),
         rate_per_unit: parseFloat(body.rate),
+        batches: batches,
       })
       .eq('id', id)
       .select()

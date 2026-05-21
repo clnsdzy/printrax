@@ -31,6 +31,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(job.rate_per_unit), job.quantity_ordered),
         status: deriveStatus(job.quantity_printed, job.quantity_ordered),
         createdAt: job.created_at,
+        batches: job.batches || [],
       }))
 
       setJobs(formattedJobs)
@@ -76,6 +77,7 @@ export function useJobs() {
           amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
           status: deriveStatus(data.quantity_printed, data.quantity_ordered),
           createdAt: data.created_at,
+          batches: data.batches || [],
         }
 
         setJobs((prev) => [newJob, ...prev])
@@ -103,6 +105,7 @@ export function useJobs() {
           quantity: job.quantity,
           quantityPrinted: Math.min(quantityPrinted, job.quantity),
           rate: job.rate,
+          newBatch: batchAdded,
         }),
       })
 
@@ -119,6 +122,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
+        batches: data.batches || [],
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
@@ -169,6 +173,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
+        batches: data.batches || [],
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))

@@ -292,6 +292,11 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                   className="h-3"
                   indicatorClassName={getProgressColor(job.status)}
                 />
+                {job.batches && job.batches.length > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Batches: {job.batches.join(", ")}
+                  </p>
+                )}
               </div>
 
               {remainingQuantity > 0 && (

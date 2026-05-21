@@ -51,6 +51,7 @@ export async function POST(request: Request) {
           quantity_ordered: parseInt(body.quantity),
           rate_per_unit: parseFloat(body.rate),
           quantity_printed: 0,
+          batches: [],
         },
       ])
       .select()
