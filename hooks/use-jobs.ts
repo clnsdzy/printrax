@@ -31,6 +31,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(job.rate_per_unit), job.quantity_ordered),
         status: deriveStatus(job.quantity_printed, job.quantity_ordered),
         createdAt: job.created_at,
+        batches: job.batches || [],
       }))
 
       setJobs(formattedJobs)
@@ -76,6 +77,7 @@ export function useJobs() {
           amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
           status: deriveStatus(data.quantity_printed, data.quantity_ordered),
           createdAt: data.created_at,
+          batches: data.batches || [],
         }
 
         setJobs((prev) => [newJob, ...prev])
@@ -103,10 +105,15 @@ export function useJobs() {
           quantity: job.quantity,
           quantityPrinted: Math.min(quantityPrinted, job.quantity),
           rate: job.rate,
+          newBatch: batchAdded,
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to update job")
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] API error response:", errorData)
+        throw new Error(errorData.error || "Failed to update job")
+      }
       const data = await response.json()
 
       const updatedJob: PrintJob = {
@@ -119,6 +126,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
+        batches: data.batches || [],
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
@@ -127,7 +135,7 @@ export function useJobs() {
       })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
-      toast.error("Failed to update job")
+      toast.error(error instanceof Error ? error.message : "Failed to update job")
       throw error
     }
   }, [jobs])
@@ -156,7 +164,11 @@ export function useJobs() {
           }),
         })
 
-      if (!response.ok) throw new Error("Failed to update job")
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] API error response:", errorData)
+        throw new Error(errorData.error || "Failed to update job")
+      }
       const data = await response.json()
 
       const updatedJob: PrintJob = {
@@ -169,6 +181,7 @@ export function useJobs() {
         amount: calculateAmount(parseFloat(data.rate_per_unit), data.quantity_ordered),
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
+        batches: data.batches || [],
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
@@ -177,7 +190,7 @@ export function useJobs() {
       })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
-      toast.error("Failed to update job")
+      toast.error(error instanceof Error ? error.message : "Failed to update job")
       throw error
     }
   }, [jobs])

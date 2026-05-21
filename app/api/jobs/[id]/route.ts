@@ -51,6 +51,25 @@ export async function PATCH(
     }
     const body = await request.json()
 
+    // Get current batches
+    const { data: currentJob, error: fetchError } = await supabase
+      .from('print_jobs')
+      .select('batches')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      console.error('[v0] Fetch error:', fetchError)
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    }
+
+    // Handle batches array
+    let batches = currentJob?.batches || []
+    if (body.newBatch !== undefined && typeof body.newBatch === 'number') {
+      // Add new batch value and keep only last 25
+      batches = [...batches, body.newBatch].slice(-25)
+    }
+
     const { data, error } = await supabase
       .from('print_jobs')
       .update({
@@ -59,18 +78,25 @@ export async function PATCH(
         quantity_ordered: parseInt(body.quantity),
         quantity_printed: parseInt(body.quantityPrinted),
         rate_per_unit: parseFloat(body.rate),
+        batches: batches,
       })
       .eq('id', id)
       .select()
 
     if (error) {
+      console.error('[v0] Supabase error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'No data returned' }, { status: 500 })
+    }
+
     return NextResponse.json(data[0])
-  } catch (_error) {
+  } catch (error) {
+    console.error('[v0] PATCH error:', error)
     return NextResponse.json(
-      { error: 'Failed to update job' },
+      { error: error instanceof Error ? error.message : 'Failed to update job' },
       { status: 500 }
     )
   }
