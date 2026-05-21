@@ -51,47 +51,35 @@ export async function PATCH(
     }
     const body = await request.json()
 
-    // Handle batches array
-    let batches: number[] = []
-    
-    // Try to get current batches if the column exists
-    try {
-      const { data: currentJob } = await supabase
-        .from('print_jobs')
-        .select('batches')
-        .eq('id', id)
-        .single()
+    // Get current batches
+    const { data: currentJob, error: fetchError } = await supabase
+      .from('print_jobs')
+      .select('batches')
+      .eq('id', id)
+      .single()
 
-      if (currentJob?.batches) {
-        batches = currentJob.batches
-      }
-    } catch {
-      // Column might not exist yet, continue with empty array
-      batches = []
+    if (fetchError) {
+      console.error('[v0] Fetch error:', fetchError)
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
     }
 
+    // Handle batches array
+    let batches = currentJob?.batches || []
     if (body.newBatch !== undefined && typeof body.newBatch === 'number') {
       // Add new batch value and keep only last 25
       batches = [...batches, body.newBatch].slice(-25)
     }
 
-    // Update without batches if the column doesn't exist
-    const updatePayload: any = {
-      job_name: body.jobName,
-      description: body.description,
-      quantity_ordered: parseInt(body.quantity),
-      quantity_printed: parseInt(body.quantityPrinted),
-      rate_per_unit: parseFloat(body.rate),
-    }
-
-    // Only add batches if we have values to add
-    if (batches.length > 0 || body.newBatch !== undefined) {
-      updatePayload.batches = batches
-    }
-
     const { data, error } = await supabase
       .from('print_jobs')
-      .update(updatePayload)
+      .update({
+        job_name: body.jobName,
+        description: body.description,
+        quantity_ordered: parseInt(body.quantity),
+        quantity_printed: parseInt(body.quantityPrinted),
+        rate_per_unit: parseFloat(body.rate),
+        batches: batches,
+      })
       .eq('id', id)
       .select()
 
