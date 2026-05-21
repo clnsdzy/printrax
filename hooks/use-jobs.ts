@@ -109,7 +109,11 @@ export function useJobs() {
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to update job")
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] API error response:", errorData)
+        throw new Error(errorData.error || "Failed to update job")
+      }
       const data = await response.json()
 
       const updatedJob: PrintJob = {
@@ -131,7 +135,7 @@ export function useJobs() {
       })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
-      toast.error("Failed to update job")
+      toast.error(error instanceof Error ? error.message : "Failed to update job")
       throw error
     }
   }, [jobs])
@@ -160,7 +164,11 @@ export function useJobs() {
           }),
         })
 
-      if (!response.ok) throw new Error("Failed to update job")
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] API error response:", errorData)
+        throw new Error(errorData.error || "Failed to update job")
+      }
       const data = await response.json()
 
       const updatedJob: PrintJob = {
@@ -182,7 +190,7 @@ export function useJobs() {
       })
     } catch (error) {
       console.error("[v0] Error updating job:", error)
-      toast.error("Failed to update job")
+      toast.error(error instanceof Error ? error.message : "Failed to update job")
       throw error
     }
   }, [jobs])
