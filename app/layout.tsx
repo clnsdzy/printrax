@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${jetbrainsMono.variable} font-sans antialiased`}>
+      <body suppressHydrationWarning className={`${jetbrainsMono.variable} font-sans antialiased`}>
         <ThemeProvider
           defaultTheme="system"
           storageKey="printrax-ui-theme"

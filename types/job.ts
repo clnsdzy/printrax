@@ -11,6 +11,8 @@ export interface PrintJob {
   status: JobStatus
   createdAt: string
   batches: number[]
+  packs: number
+  qtyPerPack: number
 }
 
 export function deriveStatus(quantityPrinted: number, quantity: number): JobStatus {

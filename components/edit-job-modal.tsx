@@ -18,14 +18,15 @@ interface EditJobModalProps {
   job: PrintJob | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (id: string, jobName: string, description: string, rate: number, quantity: number) => void
+  onSubmit: (id: string, jobName: string, description: string, rate: number, quantity: number, packs: number, qtyPerPack: number) => void
 }
 
 export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModalProps) {
   const [jobName, setJobName] = useState("")
   const [description, setDescription] = useState("")
   const [rate, setRate] = useState("")
-  const [quantity, setQuantity] = useState("")
+  const [packs, setPacks] = useState("")
+  const [qtyPerPack, setQtyPerPack] = useState("")
   const [validationMessage, setValidationMessage] = useState("")
 
   useEffect(() => {
@@ -33,20 +34,24 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
       setJobName(job.jobName)
       setDescription(job.description)
       setRate(job.rate.toString())
-      setQuantity(job.quantity.toString())
+      setPacks(job.packs.toString())
+      setQtyPerPack(job.qtyPerPack.toString())
       setValidationMessage("")
     }
   }, [job])
 
+  const calculatedQuantity = parseInt(packs || "0") * parseInt(qtyPerPack || "0")
   const calculatedAmount =
-    rate && quantity ? (parseFloat(rate) * parseInt(quantity)).toFixed(2) : "0.00"
+    rate && calculatedQuantity > 0 ? (parseFloat(rate) * calculatedQuantity).toFixed(2) : "0.00"
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!job || !rate || !quantity || !jobName) return
+    if (!job || !rate || !packs || !qtyPerPack || !jobName) return
 
     const parsedRate = parseFloat(rate)
-    const parsedQuantity = parseInt(quantity)
+    const parsedPacks = parseInt(packs)
+    const parsedQtyPerPack = parseInt(qtyPerPack)
+    const parsedQuantity = parsedPacks * parsedQtyPerPack
 
     if (parsedRate < 0) {
       setValidationMessage("Rate per unit must be 0 or greater.")
@@ -61,7 +66,7 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
     }
 
     setValidationMessage("")
-    onSubmit(job.id, jobName, description, parsedRate, parsedQuantity)
+    onSubmit(job.id, jobName, description, parsedRate, parsedQuantity, parsedPacks, parsedQtyPerPack)
     onOpenChange(false)
   }
 
@@ -103,28 +108,48 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="editRate">Rate per Unit (N) *</Label>
+                <Label htmlFor="editPacks">Packs *</Label>
                 <Input
-                  id="editRate"
+                  id="editPacks"
                   type="number"
-                  step="0.01"
-                  min="0"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
+                  min="1"
+                  value={packs}
+                  onChange={(e) => setPacks(e.target.value)}
                   required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="editQuantity">Total Quantity *</Label>
+                <Label htmlFor="editQtyPerPack">Qty Per Pack *</Label>
                 <Input
-                  id="editQuantity"
+                  id="editQtyPerPack"
                   type="number"
-                  min={job.quantityPrinted}
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  min="1"
+                  value={qtyPerPack}
+                  onChange={(e) => setQtyPerPack(e.target.value)}
                   required
                 />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Total Quantity</Label>
+              <div className="flex h-9 w-full items-center rounded-md border bg-muted px-3 text-sm">
+                <span className="text-sm font-medium">{calculatedQuantity}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {packs} packs × {qtyPerPack} per pack = {calculatedQuantity}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editRate">Rate per Unit (N) *</Label>
+              <Input
+                id="editRate"
+                type="number"
+                step="0.01"
+                min="0"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label>Total Amount</Label>

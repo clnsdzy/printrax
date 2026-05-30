@@ -42,11 +42,13 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     jobName: string,
     description: string,
     rate: number,
-    quantity: number
+    quantity: number,
+    packs: number,
+    qtyPerPack: number
   ) => {
     try {
       setError(null)
-      await updateJob(id, jobName, description, rate, quantity)
+      await updateJob(id, jobName, description, rate, quantity, packs, qtyPerPack)
       setEditJobOpen(false)
     } catch (err) {
       console.error("[v0] Failed to update job:", err)
@@ -68,6 +70,8 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     description: string
     rate: number
     quantity: number
+    packs: number
+    qtyPerPack: number
   }) => {
     try {
       setError(null)
@@ -222,6 +226,8 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
 
   const getAbbreviatedId = (id: string) => `#${id.slice(-6)}`
 
+  const packsPrinted = job.qtyPerPack > 0 ? (job.quantityPrinted / job.qtyPerPack).toFixed(2) : "0.00"
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onNewJob={() => setNewJobOpen(true)} />
@@ -297,6 +303,21 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                     Batches: {job.batches.join(", ")}
                   </p>
                 )}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-lg bg-muted/50 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Packs Printed</p>
+                  <p className="mt-1 text-lg font-semibold">{packsPrinted}</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Qty Per Pack</p>
+                  <p className="mt-1 text-lg font-semibold">{job.qtyPerPack}</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Total Packs</p>
+                  <p className="mt-1 text-lg font-semibold">{job.packs}</p>
+                </div>
               </div>
 
               {remainingQuantity > 0 && (
