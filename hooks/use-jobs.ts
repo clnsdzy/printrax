@@ -32,6 +32,8 @@ export function useJobs() {
         status: deriveStatus(job.quantity_printed, job.quantity_ordered),
         createdAt: job.created_at,
         batches: job.batches || [],
+        packs: job.packs || 1,
+        qtyPerPack: job.qty_per_pack || 1,
       }))
 
       setJobs(formattedJobs)
@@ -45,7 +47,7 @@ export function useJobs() {
   }, [])
 
   const addJob = useCallback(
-    async (jobData: { jobName: string; description: string; rate: number; quantity: number }) => {
+    async (jobData: { jobName: string; description: string; rate: number; quantity: number; packs: number; qtyPerPack: number }) => {
       try {
         const response = await fetch("/api/jobs", {
           method: "POST",
@@ -55,6 +57,8 @@ export function useJobs() {
             description: jobData.description,
             quantity: jobData.quantity,
             rate: jobData.rate,
+            packs: jobData.packs,
+            qtyPerPack: jobData.qtyPerPack,
           }),
         })
 
@@ -78,6 +82,8 @@ export function useJobs() {
           status: deriveStatus(data.quantity_printed, data.quantity_ordered),
           createdAt: data.created_at,
           batches: data.batches || [],
+          packs: data.packs || 1,
+          qtyPerPack: data.qty_per_pack || 1,
         }
 
         setJobs((prev) => [newJob, ...prev])
@@ -127,6 +133,8 @@ export function useJobs() {
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
         batches: data.batches || [],
+        packs: data.packs || 1,
+        qtyPerPack: data.qty_per_pack || 1,
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
@@ -182,6 +190,8 @@ export function useJobs() {
         status: deriveStatus(data.quantity_printed, data.quantity_ordered),
         createdAt: data.created_at,
         batches: data.batches || [],
+        packs: data.packs || 1,
+        qtyPerPack: data.qty_per_pack || 1,
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))

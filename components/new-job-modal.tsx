@@ -22,6 +22,8 @@ interface NewJobModalProps {
     description: string
     rate: number
     quantity: number
+    packs: number
+    qtyPerPack: number
   }) => void
 }
 
@@ -29,29 +31,34 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
   const [jobName, setJobName] = useState("")
   const [description, setDescription] = useState("")
   const [rate, setRate] = useState("")
-  const [quantity, setQuantity] = useState("")
+  const [packs, setPacks] = useState("1")
+  const [qtyPerPack, setQtyPerPack] = useState("1")
 
+  const calculatedQuantity = parseInt(packs || "0") * parseInt(qtyPerPack || "0")
   const calculatedAmount =
-    rate && quantity ? (parseFloat(rate) * parseInt(quantity)).toFixed(2) : "0.00"
+    rate && calculatedQuantity > 0 ? (parseFloat(rate) * calculatedQuantity).toFixed(2) : "0.00"
 
   useEffect(() => {
     if (!open) {
       setJobName("")
       setDescription("")
       setRate("")
-      setQuantity("")
+      setPacks("1")
+      setQtyPerPack("1")
     }
   }, [open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!jobName.trim() || !rate || !quantity) return
+    if (!jobName.trim() || !rate || !packs || !qtyPerPack) return
 
     onSubmit({
       jobName: jobName.trim(),
       description: description.trim(),
       rate: parseFloat(rate),
-      quantity: parseInt(quantity),
+      quantity: calculatedQuantity,
+      packs: parseInt(packs),
+      qtyPerPack: parseInt(qtyPerPack),
     })
     onOpenChange(false)
   }
@@ -90,30 +97,51 @@ export function NewJobModal({ open, onOpenChange, onSubmit }: NewJobModalProps) 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="rate">Rate per Unit (N) *</Label>
+                <Label htmlFor="packs">Packs *</Label>
                 <Input
-                  id="rate"
+                  id="packs"
                   type="number"
-                  step="0.01"
-                  min="0"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                  placeholder="0.00"
+                  min="1"
+                  value={packs}
+                  onChange={(e) => setPacks(e.target.value)}
+                  placeholder="1"
                   required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="quantity">Quantity Ordered *</Label>
+                <Label htmlFor="qtyPerPack">Qty Per Pack *</Label>
                 <Input
-                  id="quantity"
+                  id="qtyPerPack"
                   type="number"
                   min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  placeholder="0"
+                  value={qtyPerPack}
+                  onChange={(e) => setQtyPerPack(e.target.value)}
+                  placeholder="1"
                   required
                 />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Quantity Ordered</Label>
+              <div className="flex h-9 w-full items-center rounded-md border bg-muted px-3 text-sm">
+                <span className="text-sm font-medium">{calculatedQuantity}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {packs} packs × {qtyPerPack} per pack = {calculatedQuantity}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="rate">Rate per Unit (N) *</Label>
+              <Input
+                id="rate"
+                type="number"
+                step="0.01"
+                min="0"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                placeholder="0.00"
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label>Total Amount</Label>
