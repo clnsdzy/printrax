@@ -224,7 +224,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
 
   const getAbbreviatedId = (id: string) => `#${id.slice(-6)}`
 
-  const packsPrinted = job.packs > 0 ? (job.quantityPrinted / job.packs).toFixed(2) : "0.00"
+  const packsPrinted = job.qtyPerPack > 0 ? (job.quantityPrinted / job.qtyPerPack).toFixed(2) : "0.00"
 
   return (
     <div className="min-h-screen bg-background">
