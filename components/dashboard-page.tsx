@@ -27,6 +27,8 @@ export function DashboardPage() {
     description: string
     rate: number
     quantity: number
+    packs: number
+    qtyPerPack: number
   }) => {
     try {
       setError(null)
@@ -53,11 +55,13 @@ export function DashboardPage() {
     jobName: string,
     description: string,
     rate: number,
-    quantity: number
+    quantity: number,
+    packs: number,
+    qtyPerPack: number
   ) => {
     try {
       setError(null)
-      await updateJob(id, jobName, description, rate, quantity)
+      await updateJob(id, jobName, description, rate, quantity, packs, qtyPerPack)
       setEditJobOpen(false)
     } catch (err) {
       console.error("[v0] Failed to update job:", err)
