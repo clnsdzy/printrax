@@ -154,7 +154,9 @@ export function useJobs() {
       jobName: string,
       description: string,
       rate: number,
-      quantity: number
+      quantity: number,
+      packs: number,
+      qtyPerPack: number
     ) => {
       try {
         const job = jobs.find((j) => j.id === id)
@@ -169,6 +171,8 @@ export function useJobs() {
             quantity,
             quantityPrinted: job.quantityPrinted,
             rate,
+            packs,
+            qtyPerPack,
           }),
         })
 
