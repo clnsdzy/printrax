@@ -70,6 +70,8 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
     description: string
     rate: number
     quantity: number
+    packs: number
+    qtyPerPack: number
   }) => {
     try {
       setError(null)
