@@ -54,6 +54,7 @@ export async function POST(request: Request) {
           batches: [],
           packs: parseInt(body.packs),
           qty_per_pack: parseInt(body.qtyPerPack),
+          waste: 0,
         },
       ])
       .select()

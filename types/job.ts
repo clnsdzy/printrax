@@ -13,6 +13,7 @@ export interface PrintJob {
   batches: number[]
   packs: number
   qtyPerPack: number
+  waste: number
 }
 
 export function deriveStatus(quantityPrinted: number, quantity: number): JobStatus {
