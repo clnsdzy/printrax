@@ -81,6 +81,7 @@ export async function PATCH(
         batches: batches,
         packs: body.packs ? parseInt(body.packs) : undefined,
         qty_per_pack: body.qtyPerPack ? parseInt(body.qtyPerPack) : undefined,
+        waste: body.waste !== undefined ? parseInt(body.waste) : undefined,
       })
       .eq('id', id)
       .select()

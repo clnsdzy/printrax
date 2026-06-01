@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { UpdateProgressModal } from "@/components/update-progress-modal"
 import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
@@ -29,6 +31,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
   const [editJobOpen, setEditJobOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [newJobOpen, setNewJobOpen] = useState(false)
+  const [wasteInput, setWasteInput] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   const job = useMemo(() => jobs.find((j) => j.id === jobId), [jobs, jobId])
@@ -63,6 +66,23 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
   const handleConfirmDelete = (id: string) => {
     deleteJob(id)
     router.push("/dashboard")
+  }
+
+  const handleUpdateWaste = async () => {
+    if (!job || wasteInput === "") return
+    try {
+      setError(null)
+      const waste = parseInt(wasteInput)
+      if (isNaN(waste) || waste < 0) {
+        setError("Waste must be a valid number")
+        return
+      }
+      await updateJob(job.id, job.jobName, job.description, job.rate, job.quantity, job.packs, job.qtyPerPack, waste)
+      setWasteInput("")
+    } catch (err) {
+      console.error("[v0] Failed to update waste:", err)
+      setError(err instanceof Error ? err.message : "Failed to update waste")
+    }
   }
 
   const handleAddJob = async (data: {
@@ -320,13 +340,44 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                 </div>
               </div>
 
-              {remainingQuantity > 0 && (
-                <div className="rounded-lg bg-muted/50 p-4">
-                  <p className="text-sm text-muted-foreground">
-                    {remainingQuantity} items remaining
-                  </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {remainingQuantity > 0 && (
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Items Remaining (Qty - Waste)
+                    </p>
+                    <p className="mt-2 text-lg font-semibold">
+                      {remainingQuantity - job.waste}
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="waste">Waste (Units)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="waste"
+                      type="number"
+                      min="0"
+                      value={wasteInput}
+                      onChange={(e) => setWasteInput(e.target.value)}
+                      placeholder="Enter waste units"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleUpdateWaste}
+                      disabled={!wasteInput}
+                      className="whitespace-nowrap"
+                    >
+                      Update Waste
+                    </Button>
+                  </div>
+                  {job.waste > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Current waste: {job.waste} units
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
 
               <Button onClick={() => setUpdateProgressOpen(true)} className="w-full">
                 Update Progress

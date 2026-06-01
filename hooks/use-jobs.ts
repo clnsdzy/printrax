@@ -34,6 +34,7 @@ export function useJobs() {
         batches: job.batches || [],
         packs: job.packs || 1,
         qtyPerPack: job.qty_per_pack || 1,
+        waste: job.waste || 0,
       }))
 
       setJobs(formattedJobs)
@@ -84,6 +85,7 @@ export function useJobs() {
           batches: data.batches || [],
           packs: data.packs || 1,
           qtyPerPack: data.qty_per_pack || 1,
+          waste: data.waste || 0,
         }
 
         setJobs((prev) => [newJob, ...prev])
@@ -135,6 +137,7 @@ export function useJobs() {
         batches: data.batches || [],
         packs: data.packs || 1,
         qtyPerPack: data.qty_per_pack || 1,
+        waste: data.waste || 0,
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
@@ -156,7 +159,8 @@ export function useJobs() {
       rate: number,
       quantity: number,
       packs: number,
-      qtyPerPack: number
+      qtyPerPack: number,
+      waste?: number
     ) => {
       try {
         const job = jobs.find((j) => j.id === id)
@@ -173,6 +177,7 @@ export function useJobs() {
             rate,
             packs,
             qtyPerPack,
+            waste,
           }),
         })
 
@@ -196,6 +201,7 @@ export function useJobs() {
         batches: data.batches || [],
         packs: data.packs || 1,
         qtyPerPack: data.qty_per_pack || 1,
+        waste: data.waste || 0,
       }
 
       setJobs((prev) => prev.map((j) => (j.id === id ? updatedJob : j)))
