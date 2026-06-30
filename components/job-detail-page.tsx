@@ -16,6 +16,7 @@ import { UpdateProgressModal } from "@/components/update-progress-modal"
 import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 import { NewJobModal } from "@/components/new-job-modal"
+import { JobActivityCard } from "@/components/job-activity-card"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeftIcon, PencilEdit02Icon, Delete02Icon, Download04Icon } from "@hugeicons/core-free-icons"
 
@@ -384,6 +385,8 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
               </Button>
             </CardContent>
           </Card>
+
+          <JobActivityCard job={job} />
 
           <Card>
             <CardHeader>
