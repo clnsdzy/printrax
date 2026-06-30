@@ -13,6 +13,8 @@ interface JobsTableProps {
   onUpdateProgress: (job: PrintJob) => void
   onEdit: (job: PrintJob) => void
   onDelete: (job: PrintJob) => void
+  showFinancials?: boolean
+  showWaste?: boolean
 }
 
 function getStatusColor(status: PrintJob["status"]) {
@@ -37,7 +39,14 @@ function getStatusDotColor(status: PrintJob["status"]) {
   }
 }
 
-export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTableProps) {
+export function JobsTable({
+  jobs,
+  onUpdateProgress,
+  onEdit,
+  onDelete,
+  showFinancials = true,
+  showWaste = true,
+}: JobsTableProps) {
   if (jobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -57,6 +66,10 @@ export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTabl
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {jobs.map((job) => {
           const progressPercent = (job.quantityPrinted / job.quantity) * 100
+          const remainingQuantity = Math.max(
+            job.quantity - job.quantityPrinted - (showWaste ? job.waste : 0),
+            0
+          )
           return (
             <Link key={job.id} href={`/jobs/${job.id}`} className="group">
               <Card className="flex h-full flex-col border transition-all hover:border-foreground/20 hover:shadow-lg">
@@ -91,7 +104,40 @@ export function JobsTable({ jobs, onUpdateProgress, onEdit, onDelete }: JobsTabl
                       className="h-2"
                       indicatorClassName={getStatusColor(job.status)}
                     />
+                    <div className="grid grid-cols-2 gap-2 pt-2 text-xs text-muted-foreground">
+                      <span>
+                        Remaining:{" "}
+                        <span className="font-medium text-foreground">
+                          {remainingQuantity}
+                        </span>
+                      </span>
+                      {showWaste && job.waste > 0 && (
+                        <span className="text-right">
+                          Waste:{" "}
+                          <span className="font-medium text-foreground">
+                            {job.waste}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {showFinancials && (
+                    <div className="grid grid-cols-2 gap-3 border-t pt-3 text-xs">
+                      <div>
+                        <p className="text-muted-foreground">Rate</p>
+                        <p className="mt-1 font-medium">
+                          N{job.rate.toLocaleString("en-US")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-muted-foreground">Total</p>
+                        <p className="mt-1 font-medium">
+                          N{job.amount.toLocaleString("en-US")}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Actions Section */}
                   <div className="flex flex-wrap gap-2 pt-2" onClick={(e) => e.preventDefault()}>

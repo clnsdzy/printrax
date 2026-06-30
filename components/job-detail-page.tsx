@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { jsPDF } from "jspdf"
 import { PrintJob } from "@/types/job"
 import { useJobs } from "@/hooks/use-jobs"
+import { usePreferences } from "@/hooks/use-preferences"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +28,7 @@ interface JobDetailPageClientProps {
 export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
   const router = useRouter()
   const { jobs, isLoaded, updateProgress, updateJob, deleteJob, addJob } = useJobs()
+  const { preferences } = usePreferences()
 
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
   const [editJobOpen, setEditJobOpen] = useState(false)
@@ -319,11 +321,6 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                   className="h-3"
                   indicatorClassName={getProgressColor(job.status)}
                 />
-                {job.batches && job.batches.length > 0 && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Batches: {job.batches.join(", ")}
-                  </p>
-                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
@@ -345,39 +342,45 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
                 {remainingQuantity > 0 && (
                   <div className="rounded-lg bg-muted/50 p-4">
                     <p className="text-sm text-muted-foreground">
-                      Items Remaining (Qty - Waste)
+                      {preferences.showWaste
+                        ? "Items Remaining (Qty - Waste)"
+                        : "Items Remaining"}
                     </p>
                     <p className="mt-2 text-lg font-semibold">
-                      {remainingQuantity - job.waste}
+                      {preferences.showWaste
+                        ? Math.max(remainingQuantity - job.waste, 0)
+                        : remainingQuantity}
                     </p>
                   </div>
                 )}
-                <div className="space-y-2">
-                  <Label htmlFor="waste">Waste (Units)</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="waste"
-                      type="number"
-                      min="0"
-                      value={wasteInput}
-                      onChange={(e) => setWasteInput(e.target.value)}
-                      placeholder="Enter waste units"
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleUpdateWaste}
-                      disabled={!wasteInput}
-                      className="whitespace-nowrap"
-                    >
-                      Update Waste
-                    </Button>
+                {preferences.showWaste && (
+                  <div className="space-y-2">
+                    <Label htmlFor="waste">Waste (Units)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="waste"
+                        type="number"
+                        min="0"
+                        value={wasteInput}
+                        onChange={(e) => setWasteInput(e.target.value)}
+                        placeholder="Enter waste units"
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleUpdateWaste}
+                        disabled={!wasteInput}
+                        className="whitespace-nowrap"
+                      >
+                        Update Waste
+                      </Button>
+                    </div>
+                    {job.waste > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Current waste: {job.waste} units
+                      </p>
+                    )}
                   </div>
-                  {job.waste > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Current waste: {job.waste} units
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
 
               <Button onClick={() => setUpdateProgressOpen(true)} className="w-full">
@@ -386,61 +389,63 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
             </CardContent>
           </Card>
 
-          <JobActivityCard job={job} />
+          <JobActivityCard job={job} showWaste={preferences.showWaste} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Financials</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="border-l-2 border-primary pl-4">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Rate per Unit
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">
-                    <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">N</span>
-                      <span>{formatCurrency(job.rate)}</span>
-                    </span>
-                  </p>
+          {preferences.showFinancials && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Financials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="border-l-2 border-primary pl-4">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Rate per Unit
+                    </p>
+                    <p className="mt-1 text-2xl font-bold">
+                      <span className="inline-flex items-baseline gap-1">
+                        <span className="text-inherit">N</span>
+                        <span>{formatCurrency(job.rate)}</span>
+                      </span>
+                    </p>
+                  </div>
+                  <div className="border-l-2 border-primary pl-4">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Amount
+                    </p>
+                    <p className="mt-1 text-2xl font-bold">
+                      <span className="inline-flex items-baseline gap-1">
+                        <span className="text-inherit">N</span>
+                        <span>{formatCurrency(job.amount)}</span>
+                      </span>
+                    </p>
+                  </div>
+                  <div className="border-l-2 border-primary pl-4">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Revenue Earned
+                    </p>
+                    <p className="mt-1 text-2xl font-bold">
+                      <span className="inline-flex items-baseline gap-1">
+                        <span className="text-inherit">N</span>
+                        <span>{formatCurrency(job.rate * job.quantityPrinted)}</span>
+                      </span>
+                    </p>
+                  </div>
+                  <div className="border-l-2 border-primary pl-4">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Pending Revenue
+                    </p>
+                    <p className="mt-1 text-2xl font-bold">
+                      <span className="inline-flex items-baseline gap-1">
+                        <span className="text-inherit">N</span>
+                        <span>{formatCurrency(job.rate * remainingQuantity)}</span>
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="border-l-2 border-primary pl-4">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Amount
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">
-                    <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">N</span>
-                      <span>{formatCurrency(job.amount)}</span>
-                    </span>
-                  </p>
-                </div>
-                <div className="border-l-2 border-primary pl-4">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Revenue Earned
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">
-                    <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">N</span>
-                      <span>{formatCurrency(job.rate * job.quantityPrinted)}</span>
-                    </span>
-                  </p>
-                </div>
-                <div className="border-l-2 border-primary pl-4">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Pending Revenue
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">
-                    <span className="inline-flex items-baseline gap-1">
-                      <span className="text-inherit">N</span>
-                      <span>{formatCurrency(job.rate * remainingQuantity)}</span>
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="border-red-200">
             <CardHeader>

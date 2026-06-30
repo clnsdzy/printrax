@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Delete02Icon,
@@ -21,8 +22,15 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
 
 type ActivityType = "batch" | "waste" | "edit" | "created"
+
+interface ActivityActor {
+  firstName: string
+  userId: string
+}
 
 interface ActivityDetail {
   label: string
@@ -41,7 +49,10 @@ interface JobActivity {
 
 interface JobActivityCardProps {
   job: PrintJob
+  showWaste?: boolean
 }
+
+const MAX_VISIBLE_ACTIVITIES = 10
 
 const formatNumber = (value: number) => value.toLocaleString("en-US")
 
@@ -64,6 +75,28 @@ const getPercent = (value: number, total: number) => {
   if (total <= 0) return "0%"
 
   return `${Math.min((value / total) * 100, 100).toFixed(0)}%`
+}
+
+const getFirstName = (metadata: Record<string, unknown>) => {
+  const name =
+    metadata.first_name ??
+    metadata.firstName ??
+    metadata.name ??
+    metadata.full_name
+
+  if (typeof name !== "string" || !name.trim()) {
+    return "Unknown"
+  }
+
+  return name.trim().split(/\s+/)[0]
+}
+
+const getAbbreviatedUserId = (userId: string) => {
+  if (!userId || userId === "Not available") {
+    return "Not available"
+  }
+
+  return userId.slice(-6)
 }
 
 const getActivityStyles = (type: ActivityType) => {
@@ -95,7 +128,7 @@ const getActivityStyles = (type: ActivityType) => {
   }
 }
 
-const buildActivities = (job: PrintJob): JobActivity[] => {
+const buildActivities = (job: PrintJob, showWaste: boolean): JobActivity[] => {
   const batchActivities = job.batches.map((batch, index) => {
     const cumulativePrinted = job.batches
       .slice(0, index + 1)
@@ -120,7 +153,7 @@ const buildActivities = (job: PrintJob): JobActivity[] => {
   })
 
   const wasteActivity =
-    job.waste > 0
+    showWaste && job.waste > 0
       ? [
           {
             id: "waste",
@@ -186,9 +219,48 @@ const buildActivities = (job: PrintJob): JobActivity[] => {
   ]
 }
 
-export function JobActivityCard({ job }: JobActivityCardProps) {
-  const activities = buildActivities(job)
+export function JobActivityCard({ job, showWaste = true }: JobActivityCardProps) {
+  const [actor, setActor] = useState<ActivityActor>({
+    firstName: "Unknown",
+    userId: "Not available",
+  })
+  const [visibleActivityCount, setVisibleActivityCount] = useState(
+    MAX_VISIBLE_ACTIVITIES
+  )
+  const allActivities = buildActivities(job, showWaste)
+  const activities = allActivities.slice(0, visibleActivityCount)
   const activityLabel = activities.length === 1 ? "event" : "events"
+  const hasMoreActivities = visibleActivityCount < allActivities.length
+
+  useEffect(() => {
+    let isActive = true
+
+    const fetchActor = async () => {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!isActive || !user) {
+        return
+      }
+
+      setActor({
+        firstName: getFirstName(user.user_metadata ?? {}),
+        userId: user.id,
+      })
+    }
+
+    void fetchActor()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    setVisibleActivityCount(MAX_VISIBLE_ACTIVITIES)
+  }, [job.id, showWaste])
 
   return (
     <Card>
@@ -197,11 +269,17 @@ export function JobActivityCard({ job }: JobActivityCardProps) {
           <div className="space-y-1.5">
             <CardTitle>Activity</CardTitle>
             <CardDescription>
-              Production batches, waste, and saved job edits.
+              {showWaste
+                ? "Production batches, waste, and saved job edits."
+                : "Production batches and saved job edits."}
             </CardDescription>
           </div>
           <Badge variant="secondary" className="w-fit">
-            {activities.length} {activityLabel}
+            {activities.length}
+            {allActivities.length > MAX_VISIBLE_ACTIVITIES
+              ? ` of ${allActivities.length}`
+              : ""}{" "}
+            {activityLabel}
           </Badge>
         </div>
       </CardHeader>
@@ -254,6 +332,22 @@ export function JobActivityCard({ job }: JobActivityCardProps) {
                       </p>
                     </div>
                     <div className="grid gap-2 border-t pt-3">
+                      <div className="grid grid-cols-[8rem_1fr] gap-3 text-xs">
+                        <span className="text-muted-foreground">
+                          Changed by
+                        </span>
+                        <span className="min-w-0 break-words text-right font-medium text-foreground">
+                          {actor.firstName}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[8rem_1fr] gap-3 text-xs">
+                        <span className="text-muted-foreground">
+                          User ID
+                        </span>
+                        <span className="min-w-0 break-words text-right font-medium text-foreground">
+                          {getAbbreviatedUserId(actor.userId)}
+                        </span>
+                      </div>
                       {activity.details.map((detail) => (
                         <div
                           key={detail.label}
@@ -274,6 +368,25 @@ export function JobActivityCard({ job }: JobActivityCardProps) {
             )
           })}
         </div>
+        {hasMoreActivities && (
+          <div className="border-t pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() =>
+                setVisibleActivityCount((currentCount) =>
+                  Math.min(
+                    currentCount + MAX_VISIBLE_ACTIVITIES,
+                    allActivities.length
+                  )
+                )
+              }
+            >
+              View More
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

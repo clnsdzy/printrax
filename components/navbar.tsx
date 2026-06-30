@@ -11,16 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useTheme } from "@/components/theme-provider"
 import { createClient } from "@/lib/supabase/client"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ComputerIcon,
   GridIcon,
   Logout03Icon,
-  Moon02Icon,
   PlusSignIcon,
-  SunIcon,
   UserCircleIcon,
   UserIcon,
 } from "@hugeicons/core-free-icons"
@@ -32,7 +29,6 @@ const AUTO_LOGOUT_MS = 30 * 60 * 1000
 
 export function Navbar({ onNewJob }: NavbarProps) {
   const router = useRouter()
-  const { setTheme } = useTheme()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [userId, setUserId] = useState<string>("")
@@ -122,6 +118,13 @@ export function Navbar({ onNewJob }: NavbarProps) {
           <HugeiconsIcon icon={GridIcon} size={24} className="text-primary" />
         </Link>
         <div className="flex items-center gap-3">
+          {userId && (
+            <div className="hidden border px-2 py-1 text-xs text-muted-foreground sm:block">
+              <span className="font-mono font-medium text-foreground">
+                {userId.slice(-6)}
+              </span>
+            </div>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open profile menu">
@@ -130,29 +133,22 @@ export function Navbar({ onNewJob }: NavbarProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem asChild>
+                <Link href="/dashboard">
+                  <HugeiconsIcon icon={GridIcon} size={16} />
+                  Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/profile">
                   <HugeiconsIcon icon={UserIcon} size={16} />
                   My Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-default hover:bg-transparent">
-                <div className="flex w-full items-center gap-2 text-sm text-muted-foreground">
-                  <span>ID:</span>
-                  <span className="font-mono font-medium text-foreground">{userId.slice(-6)}</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                <HugeiconsIcon icon={SunIcon} size={16} />
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <HugeiconsIcon icon={Moon02Icon} size={16} />
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                <HugeiconsIcon icon={ComputerIcon} size={16} />
-                System
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <HugeiconsIcon icon={ComputerIcon} size={16} />
+                  Settings
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

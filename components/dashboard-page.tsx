@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { PrintJob } from "@/types/job"
 import { useJobs } from "@/hooks/use-jobs"
+import { PrintJobsTab, usePreferences } from "@/hooks/use-preferences"
 import { Navbar } from "@/components/navbar"
 import { StatsCards } from "@/components/stats-cards"
 import { JobsTable } from "@/components/jobs-table"
@@ -14,13 +15,20 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export function DashboardPage() {
   const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
+  const { preferences } = usePreferences()
   const [newJobOpen, setNewJobOpen] = useState(false)
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
   const [editJobOpen, setEditJobOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("ongoing")
+  const [activeTab, setActiveTab] = useState<PrintJobsTab>(
+    preferences.defaultPrintJobsTab
+  )
+
+  useEffect(() => {
+    setActiveTab(preferences.defaultPrintJobsTab)
+  }, [preferences.defaultPrintJobsTab])
 
   const handleAddJob = async (data: {
     jobName: string
@@ -118,16 +126,21 @@ export function DashboardPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-8">
-          <StatsCards
-            totalJobs={stats.totalJobs}
-            inProgress={stats.inProgress}
-            completed={stats.completed}
-            totalRevenue={stats.totalRevenue}
-          />
+          {preferences.showKpiCards && (
+            <StatsCards
+              totalJobs={stats.totalJobs}
+              inProgress={stats.inProgress}
+              completed={stats.completed}
+              totalRevenue={stats.totalRevenue}
+            />
+          )}
 
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Print Jobs</h2>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as PrintJobsTab)}
+            >
               <TabsList>
                 <TabsTrigger value="all">All ({getJobCount("all")})</TabsTrigger>
                 <TabsTrigger value="completed">Completed ({getJobCount("completed")})</TabsTrigger>
@@ -140,6 +153,8 @@ export function DashboardPage() {
                   onUpdateProgress={handleUpdateProgress}
                   onEdit={handleEditJob}
                   onDelete={handleDelete}
+                  showFinancials={preferences.showFinancials}
+                  showWaste={preferences.showWaste}
                 />
               </TabsContent>
             </Tabs>
