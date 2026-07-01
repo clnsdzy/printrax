@@ -119,7 +119,11 @@ export function Navbar({ onNewJob }: NavbarProps) {
         </Link>
         <div className="flex items-center gap-3">
           {userId && (
-            <div className="hidden border px-2 py-1 text-xs text-muted-foreground sm:block">
+            <div className="hidden items-center gap-2 px-1 py-1 text-xs text-muted-foreground sm:flex">
+              <span
+                className="h-2 w-2 bg-green-500"
+                aria-label="Online"
+              />
               <span className="font-mono font-medium text-foreground">
                 {userId.slice(-6)}
               </span>

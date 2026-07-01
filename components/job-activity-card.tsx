@@ -29,7 +29,6 @@ type ActivityType = "batch" | "waste" | "edit" | "created"
 
 interface ActivityActor {
   firstName: string
-  userId: string
 }
 
 interface ActivityDetail {
@@ -89,14 +88,6 @@ const getFirstName = (metadata: Record<string, unknown>) => {
   }
 
   return name.trim().split(/\s+/)[0]
-}
-
-const getAbbreviatedUserId = (userId: string) => {
-  if (!userId || userId === "Not available") {
-    return "Not available"
-  }
-
-  return userId.slice(-6)
 }
 
 const getActivityStyles = (type: ActivityType) => {
@@ -222,7 +213,6 @@ const buildActivities = (job: PrintJob, showWaste: boolean): JobActivity[] => {
 export function JobActivityCard({ job, showWaste = true }: JobActivityCardProps) {
   const [actor, setActor] = useState<ActivityActor>({
     firstName: "Unknown",
-    userId: "Not available",
   })
   const [visibleActivityCount, setVisibleActivityCount] = useState(
     MAX_VISIBLE_ACTIVITIES
@@ -247,7 +237,6 @@ export function JobActivityCard({ job, showWaste = true }: JobActivityCardProps)
 
       setActor({
         firstName: getFirstName(user.user_metadata ?? {}),
-        userId: user.id,
       })
     }
 
@@ -338,14 +327,6 @@ export function JobActivityCard({ job, showWaste = true }: JobActivityCardProps)
                         </span>
                         <span className="min-w-0 break-words text-right font-medium text-foreground">
                           {actor.firstName}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-[8rem_1fr] gap-3 text-xs">
-                        <span className="text-muted-foreground">
-                          User ID
-                        </span>
-                        <span className="min-w-0 break-words text-right font-medium text-foreground">
-                          {getAbbreviatedUserId(actor.userId)}
                         </span>
                       </div>
                       {activity.details.map((detail) => (
