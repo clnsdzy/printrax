@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { PrintJob } from "@/types/job"
 import { useJobs } from "@/hooks/use-jobs"
 import { PrintJobsTab, usePreferences } from "@/hooks/use-preferences"
@@ -12,6 +12,15 @@ import { UpdateProgressModal } from "@/components/update-progress-modal"
 import { EditJobModal } from "@/components/edit-job-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Search01Icon } from "@hugeicons/core-free-icons"
+
+const statusSearchLabels: Record<PrintJob["status"], string> = {
+  completed: "completed complete done",
+  in_progress: "in progress ongoing active",
+  not_started: "not started pending queued",
+}
 
 export function DashboardPage() {
   const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
@@ -22,6 +31,7 @@ export function DashboardPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState<PrintJobsTab>(
     preferences.defaultPrintJobsTab
   )
@@ -82,7 +92,7 @@ export function DashboardPage() {
     setDeleteConfirmOpen(true)
   }
 
-  const getFilteredJobs = () => {
+  const tabFilteredJobs = useMemo(() => {
     switch (activeTab) {
       case "completed":
         return jobs.filter((job) => job.status === "completed")
@@ -94,9 +104,43 @@ export function DashboardPage() {
       default:
         return jobs
     }
-  }
+  }, [activeTab, jobs])
 
-  const filteredJobs = getFilteredJobs()
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase()
+
+  const filteredJobs = useMemo(() => {
+    if (!normalizedSearchQuery) {
+      return tabFilteredJobs
+    }
+
+    return tabFilteredJobs.filter((job) => {
+      const shortId = job.id.slice(-6)
+      const searchableValues = [
+        job.jobName,
+        job.description,
+        job.id,
+        shortId,
+        `#${shortId}`,
+        statusSearchLabels[job.status],
+      ]
+
+      return searchableValues.some((value) =>
+        value.toLowerCase().includes(normalizedSearchQuery)
+      )
+    })
+  }, [normalizedSearchQuery, tabFilteredJobs])
+
+  const emptyTitle = normalizedSearchQuery
+    ? "No matching print jobs"
+    : activeTab === "all"
+      ? "No print jobs yet"
+      : "No print jobs in this status"
+
+  const emptyDescription = normalizedSearchQuery
+    ? "Try searching by job name, description, job ID, or status."
+    : activeTab === "all"
+      ? "Click the \"New Job\" button to create your first print job."
+      : "Choose another status filter or create a new print job."
 
   const getJobCount = (status: string) => {
     switch (status) {
@@ -141,12 +185,33 @@ export function DashboardPage() {
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as PrintJobsTab)}
             >
-              <TabsList>
-                <TabsTrigger value="all">All ({getJobCount("all")})</TabsTrigger>
-                <TabsTrigger value="completed">Completed ({getJobCount("completed")})</TabsTrigger>
-                <TabsTrigger value="ongoing">Ongoing ({getJobCount("ongoing")})</TabsTrigger>
-                <TabsTrigger value="not_started">Not Started ({getJobCount("not_started")})</TabsTrigger>
-              </TabsList>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <TabsList className="max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto">
+                  <TabsTrigger value="all">All ({getJobCount("all")})</TabsTrigger>
+                  <TabsTrigger value="completed">Completed ({getJobCount("completed")})</TabsTrigger>
+                  <TabsTrigger value="ongoing">Ongoing ({getJobCount("ongoing")})</TabsTrigger>
+                  <TabsTrigger value="not_started">Not Started ({getJobCount("not_started")})</TabsTrigger>
+                </TabsList>
+                <div className="relative w-full sm:ml-auto sm:max-w-sm">
+                  <label htmlFor="dashboard-job-search" className="sr-only">
+                    Search print jobs
+                  </label>
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  >
+                    <HugeiconsIcon icon={Search01Icon} size={16} />
+                  </span>
+                  <Input
+                    id="dashboard-job-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search jobs..."
+                    className="h-8 pl-9"
+                  />
+                </div>
+              </div>
               <TabsContent value={activeTab} className="mt-6">
                 <JobsTable
                   jobs={filteredJobs}
@@ -155,6 +220,8 @@ export function DashboardPage() {
                   onDelete={handleDelete}
                   showFinancials={preferences.showFinancials}
                   showWaste={preferences.showWaste}
+                  emptyTitle={emptyTitle}
+                  emptyDescription={emptyDescription}
                 />
               </TabsContent>
             </Tabs>

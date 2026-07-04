@@ -15,6 +15,8 @@ interface JobsTableProps {
   onDelete: (job: PrintJob) => void
   showFinancials?: boolean
   showWaste?: boolean
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 function getStatusColor(status: PrintJob["status"]) {
@@ -46,16 +48,18 @@ export function JobsTable({
   onDelete,
   showFinancials = true,
   showWaste = true,
+  emptyTitle = "No print jobs yet",
+  emptyDescription = "Click the \"New Job\" button to create your first print job.",
 }: JobsTableProps) {
   if (jobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <HugeiconsIcon icon={PrinterIcon} size={64} className="mb-4 text-muted-foreground/50" />
         <h3 className="text-lg font-medium text-muted-foreground">
-          No print jobs yet
+          {emptyTitle}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Click the &quot;New Job&quot; button to create your first print job.
+          {emptyDescription}
         </p>
       </div>
     )
