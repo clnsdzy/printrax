@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 import { Navbar } from "@/components/navbar"
 import { type Theme, useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
@@ -17,6 +19,8 @@ import {
   type PrintJobsTab,
   usePreferences,
 } from "@/hooks/use-preferences"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowLeftIcon } from "@hugeicons/core-free-icons"
 
 const tabOptions: Array<{ value: PrintJobsTab; label: string }> = [
   { value: "all", label: "All" },
@@ -67,6 +71,7 @@ function SettingRow({
 }
 
 export function SettingsPage() {
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { preferences, updatePreference, resetPreferences } = usePreferences()
 
@@ -76,11 +81,21 @@ export function SettingsPage() {
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage display preferences and default print job views.
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Settings</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Manage display preferences and default print job views.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+            >
+              <HugeiconsIcon icon={ArrowLeftIcon} size={16} data-icon="inline-start" />
+              Back to Dashboard
+            </Button>
           </div>
 
           <Card>
