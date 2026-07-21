@@ -51,10 +51,10 @@ export async function PATCH(
     }
     const body = await request.json()
 
-    // Get current batches
+    // Get current batches and their corresponding timestamps.
     const { data: currentJob, error: fetchError } = await supabase
       .from('print_jobs')
-      .select('batches')
+      .select('batches, batch_dates')
       .eq('id', id)
       .single()
 
@@ -65,9 +65,16 @@ export async function PATCH(
 
     // Handle batches array
     let batches = currentJob?.batches || []
+    let batchDates = currentJob?.batch_dates || []
     if (body.newBatch !== undefined && typeof body.newBatch === 'number') {
-      // Add new batch value and keep only last 25
+      // Pad legacy batches that predate timestamp tracking so indexes stay aligned.
+      batchDates = batches.map(
+        (_batch: number, index: number) => batchDates[index] ?? null
+      )
+
+      // Add the batch and its server timestamp, keeping the most recent 25.
       batches = [...batches, body.newBatch].slice(-25)
+      batchDates = [...batchDates, new Date().toISOString()].slice(-25)
     }
 
     const { data, error } = await supabase
@@ -79,6 +86,7 @@ export async function PATCH(
         quantity_printed: parseInt(body.quantityPrinted),
         rate_per_unit: parseFloat(body.rate),
         batches: batches,
+        batch_dates: batchDates,
         packs: body.packs ? parseInt(body.packs) : undefined,
         qty_per_pack: body.qtyPerPack ? parseInt(body.qtyPerPack) : undefined,
         waste: body.waste !== undefined ? parseInt(body.waste) : undefined,

@@ -11,6 +11,7 @@ export interface PrintJob {
   status: JobStatus
   createdAt: string
   batches: number[]
+  batchDates: Array<string | null>
   packs: number
   qtyPerPack: number
   waste: number

@@ -70,6 +70,14 @@ const formatDateTime = (value: string) =>
     minute: "2-digit",
   })
 
+const getBatchDate = (value: string | null | undefined) => {
+  if (!value || Number.isNaN(new Date(value).getTime())) {
+    return "Date unavailable"
+  }
+
+  return formatDateTime(value)
+}
+
 const getPercent = (value: number, total: number) => {
   if (total <= 0) return "0%"
 
@@ -121,6 +129,7 @@ const getActivityStyles = (type: ActivityType) => {
 
 const buildActivities = (job: PrintJob, showWaste: boolean): JobActivity[] => {
   const batchActivities = job.batches.map((batch, index) => {
+    const batchDate = getBatchDate(job.batchDates[index])
     const cumulativePrinted = job.batches
       .slice(0, index + 1)
       .reduce((total, currentBatch) => total + currentBatch, 0)
@@ -130,14 +139,16 @@ const buildActivities = (job: PrintJob, showWaste: boolean): JobActivity[] => {
       type: "batch" as const,
       title: `Batch ${index + 1} logged`,
       summary: `${formatNumber(batch)} units added to production`,
-      meta: getPercent(cumulativePrinted, job.quantity),
+      meta: batchDate,
       description: "A production batch was added to this print job.",
       details: [
+        { label: "Date", value: batchDate },
         { label: "Batch quantity", value: `${formatNumber(batch)} units` },
         {
           label: "Cumulative printed",
           value: `${formatNumber(cumulativePrinted)} of ${formatNumber(job.quantity)} units`,
         },
+        { label: "Progress", value: getPercent(cumulativePrinted, job.quantity) },
         { label: "Batch order", value: `${index + 1} of ${job.batches.length}` },
       ],
     }
@@ -283,7 +294,7 @@ export function JobActivityCard({ job, showWaste = true }: JobActivityCardProps)
                   <button
                     type="button"
                     className="grid w-full grid-cols-[auto_1fr] gap-3 px-0 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:grid-cols-[auto_1fr_auto] sm:px-2"
-                    aria-label={`${activity.title}: ${activity.summary}`}
+                    aria-label={`${activity.title}: ${activity.summary}. ${activity.meta}`}
                   >
                     <span className="relative mt-0.5 flex h-8 w-8 items-center justify-center border bg-background">
                       <span
