@@ -8,6 +8,7 @@ import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { EditNameModal } from "@/components/edit-name-modal"
+import { ChangePasswordModal } from "@/components/change-password-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeftIcon, PencilEdit02Icon } from "@hugeicons/core-free-icons"
 import { useEffect } from "react"
@@ -46,6 +47,7 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string>("")
   const [createdAt, setCreatedAt] = useState<string>("")
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -155,6 +157,31 @@ export default function ProfilePage() {
               </dl>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Security</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-6 py-2">
+                <div className="min-w-0 space-y-1">
+                  <dt className="text-sm font-medium text-muted-foreground">
+                    Password
+                  </dt>
+                  <dd className="mt-1 text-sm text-muted-foreground">
+                    Update your account password to keep your account secure.
+                  </dd>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                >
+                  Change Password
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
@@ -163,6 +190,11 @@ export default function ProfilePage() {
         onOpenChange={setIsEditOpen}
         currentName={displayName}
         onNameUpdated={setDisplayName}
+      />
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onOpenChange={setIsChangePasswordOpen}
       />
     </div>
   )
