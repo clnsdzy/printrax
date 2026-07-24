@@ -23,7 +23,16 @@ const statusSearchLabels: Record<PrintJob["status"], string> = {
 }
 
 export function DashboardPage() {
-  const { jobs, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats } = useJobs()
+  const {
+    jobs,
+    isLoaded,
+    addJob,
+    updateProgress,
+    updateJob,
+    resetJob,
+    deleteJob,
+    stats,
+  } = useJobs()
   const { preferences } = usePreferences()
   const [newJobOpen, setNewJobOpen] = useState(false)
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
@@ -253,6 +262,7 @@ export function DashboardPage() {
         open={editJobOpen}
         onOpenChange={setEditJobOpen}
         onSubmit={handleUpdateJob}
+        onReset={resetJob}
       />
 
       <DeleteConfirmModal

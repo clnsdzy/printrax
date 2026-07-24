@@ -13,32 +13,82 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface EditJobModalProps {
   job: PrintJob | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (id: string, jobName: string, description: string, rate: number, quantity: number, packs: number, qtyPerPack: number) => void
+  onSubmit: (
+    id: string,
+    jobName: string,
+    description: string,
+    rate: number,
+    quantity: number,
+    packs: number,
+    qtyPerPack: number
+  ) => void
+  onReset: (id: string) => Promise<void>
 }
 
-export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModalProps) {
+export function EditJobModal({
+  job,
+  open,
+  onOpenChange,
+  onSubmit,
+  onReset,
+}: EditJobModalProps) {
   const [jobName, setJobName] = useState("")
   const [description, setDescription] = useState("")
   const [rate, setRate] = useState("")
   const [packs, setPacks] = useState("")
   const [qtyPerPack, setQtyPerPack] = useState("")
   const [validationMessage, setValidationMessage] = useState("")
+  const [resetConfirmationOpen, setResetConfirmationOpen] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
+  const [resetError, setResetError] = useState("")
 
   useEffect(() => {
-    if (job) {
+    if (job && open) {
       setJobName(job.jobName)
       setDescription(job.description)
       setRate(job.rate.toString())
       setPacks(job.packs.toString())
       setQtyPerPack(job.qtyPerPack.toString())
       setValidationMessage("")
+      setResetConfirmationOpen(false)
+      setResetError("")
     }
-  }, [job])
+  }, [job, open])
+
+  const handleReset = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    if (!job || job.quantityPrinted === 0 || isResetting) return
+
+    setIsResetting(true)
+    setResetError("")
+
+    try {
+      await onReset(job.id)
+      setResetConfirmationOpen(false)
+      onOpenChange(false)
+    } catch (error) {
+      setResetError(
+        error instanceof Error ? error.message : "Failed to reset print job."
+      )
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   const calculatedQuantity = parseInt(packs || "0") * parseInt(qtyPerPack || "0")
   const calculatedAmount =
@@ -66,23 +116,32 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
     }
 
     setValidationMessage("")
-    onSubmit(job.id, jobName, description, parsedRate, parsedQuantity, parsedPacks, parsedQtyPerPack)
+    onSubmit(
+      job.id,
+      jobName,
+      description,
+      parsedRate,
+      parsedQuantity,
+      parsedPacks,
+      parsedQtyPerPack
+    )
     onOpenChange(false)
   }
 
   if (!job) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Job</DialogTitle>
-          <DialogDescription>
-            Update the rate per unit and total quantity for this job.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Job</DialogTitle>
+            <DialogDescription>
+              Update the rate per unit and total quantity for this job.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="editJobName">Job Name *</Label>
               <Input
@@ -163,15 +222,65 @@ export function EditJobModal({ job, open, onOpenChange, onSubmit }: EditJobModal
             {validationMessage && (
               <p className="text-sm text-destructive">{validationMessage}</p>
             )}
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Save Changes</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </div>
+            <DialogFooter className="gap-2 sm:justify-between sm:space-x-0">
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={job.quantityPrinted === 0}
+                onClick={() => setResetConfirmationOpen(true)}
+              >
+                Reset Print Job
+              </Button>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Save Changes</Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={resetConfirmationOpen}
+        onOpenChange={setResetConfirmationOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset this print job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reset the total quantity printed for &quot;
+              {job.jobName}&quot; from {job.quantityPrinted} to 0. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {resetError && (
+            <p role="alert" className="text-sm text-destructive">
+              {resetError}
+            </p>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isResetting}>
+              Keep Print Total
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                disabled={isResetting}
+                onClick={handleReset}
+              >
+                {isResetting ? "Resetting..." : "Yes, Reset to 0"}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

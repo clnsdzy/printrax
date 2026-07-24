@@ -51,6 +51,22 @@ export async function PATCH(
     }
     const body = await request.json()
 
+    if (body.action === 'reset-progress') {
+      const { data, error } = await supabase
+        .from('print_jobs')
+        .update({ quantity_printed: 0 })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[v0] Supabase reset error:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json(data)
+    }
+
     // Get current batches and their corresponding timestamps.
     const { data: currentJob, error: fetchError } = await supabase
       .from('print_jobs')

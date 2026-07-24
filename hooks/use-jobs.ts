@@ -219,6 +219,53 @@ export function useJobs() {
     }
   }, [jobs])
 
+  const resetJob = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset-progress" }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to reset print job")
+      }
+
+      const data = await response.json()
+      const updatedJob: PrintJob = {
+        id: data.id,
+        jobName: data.job_name,
+        description: data.description,
+        quantity: data.quantity_ordered,
+        quantityPrinted: data.quantity_printed,
+        rate: parseFloat(data.rate_per_unit),
+        amount: calculateAmount(
+          parseFloat(data.rate_per_unit),
+          data.quantity_ordered
+        ),
+        status: deriveStatus(data.quantity_printed, data.quantity_ordered),
+        createdAt: data.created_at,
+        batches: data.batches || [],
+        batchDates: data.batch_dates || [],
+        packs: data.packs || 1,
+        qtyPerPack: data.qty_per_pack || 1,
+        waste: data.waste || 0,
+      }
+
+      setJobs((prev) => prev.map((job) => (job.id === id ? updatedJob : job)))
+      toast.success(`${updatedJob.jobName} reset`, {
+        description: "Total quantity printed is now 0",
+      })
+    } catch (error) {
+      console.error("[v0] Error resetting job:", error)
+      toast.error(
+        error instanceof Error ? error.message : "Failed to reset print job"
+      )
+      throw error
+    }
+  }, [])
+
   const deleteJob = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/jobs/${id}`, {
@@ -240,5 +287,5 @@ export function useJobs() {
     totalRevenue: jobs.reduce((acc, j) => acc + j.amount, 0),
   }
 
-  return { jobs, isLoading, isLoaded, addJob, updateProgress, updateJob, deleteJob, stats }
+  return { jobs, isLoading, isLoaded, addJob, updateProgress, updateJob, resetJob, deleteJob, stats }
 }

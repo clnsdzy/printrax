@@ -27,7 +27,15 @@ interface JobDetailPageClientProps {
 
 export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
   const router = useRouter()
-  const { jobs, isLoaded, updateProgress, updateJob, deleteJob, addJob } = useJobs()
+  const {
+    jobs,
+    isLoaded,
+    updateProgress,
+    updateJob,
+    resetJob,
+    deleteJob,
+    addJob,
+  } = useJobs()
   const { preferences } = usePreferences()
 
   const [updateProgressOpen, setUpdateProgressOpen] = useState(false)
@@ -492,6 +500,7 @@ export function JobDetailPageClient({ jobId }: JobDetailPageClientProps) {
         open={editJobOpen}
         onOpenChange={setEditJobOpen}
         onSubmit={handleUpdateJob}
+        onReset={resetJob}
       />
 
       <DeleteConfirmModal
